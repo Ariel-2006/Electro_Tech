@@ -169,7 +169,8 @@ class PanelProductos(ctk.CTkFrame):
     # ------------------------------------------------------------------
     # TABLA DINÁMICA
     # ------------------------------------------------------------------
-
+    # Verificar si es aquí donde ocurre la lentidud al mostrar muchos productos,
+    # Talvez, se podría mostrar de acuerdo a los filtros de búsqueda, o paginar la tabla para no mostrar todos a la vez.
     def _refrescar_tabla(self):
         """Limpia y redibuja la tabla con el recorrido inorden del BST."""
         for widget in self.scroll_tabla.winfo_children():

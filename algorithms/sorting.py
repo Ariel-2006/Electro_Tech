@@ -112,7 +112,7 @@ def _quick_sort_rec(datos: list, clave: str) -> list:
 # ==================================================================
 # MERGE SORT  — O(n log n) siempre | O(n) espacio
 # ==================================================================
-
+# Ver si se necesita un merge_sort_inplace para ahorrar memoria, aunque es más complejo.
 def merge_sort(lista: list, clave: str = "precio") -> tuple:
     """
     Ordena la lista de productos usando MergeSort.
