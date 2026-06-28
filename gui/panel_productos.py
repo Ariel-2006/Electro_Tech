@@ -21,12 +21,11 @@ class PanelProductos(ctk.CTkFrame):
     Muestra el árbol BST como tabla dinámica (recorrido inorden).
     Permite insertar, buscar y eliminar productos individualmente.
     """
-
     def __init__(self, parent, app):
-        super().__init__(parent, fg_color=COLOR_BG, corner_radius=0)
+        super().__init__(parent, fg_color=COLOR_BG)
         self.app = app
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.pagina = 0
+        self.items_por_pag = 20
         self._construir_ui()
         self._refrescar_tabla()
 
@@ -176,9 +175,13 @@ class PanelProductos(ctk.CTkFrame):
         for widget in self.scroll_tabla.winfo_children():
             widget.destroy()
 
-        productos = self.app.arbol.inorden()  # Lista ordenada por código
+        # Solo traer la lista y usar slicing [inicio:fin]
+        lista_total = self.app.arbol.inorden()
+        inicio = self.pagina * self.items_por_pag
+        fin = inicio + self.items_por_pag
+        productos_pagina = lista_total[inicio:fin]
 
-        for idx, p in enumerate(productos):
+        for idx, p in enumerate(productos_pagina):
             color_fila = "#111827" if idx % 2 == 0 else "#0f1117"
             fila = ctk.CTkFrame(self.scroll_tabla, fg_color=color_fila, corner_radius=4)
             fila.pack(fill="x", pady=1)

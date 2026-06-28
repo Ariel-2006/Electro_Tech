@@ -19,6 +19,8 @@ from gui.panel_pedidos     import PanelPedidos
 from gui.panel_algoritmos  import PanelAlgoritmos
 from gui.panel_generador   import PanelGenerador
 
+from telegram.bot import enviar_cierre_turno
+
 # Tema global
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
@@ -47,7 +49,7 @@ class AppElectroTech(ctk.CTk):
 
         # ------ Estructuras de datos (compartidas por todos los paneles) ------
         self.arbol  = ArbolBST()
-        self.cola   = Cola()
+        self.cola = Cola(self.arbol)
         self.pila   = Pila()
         self._contador_pedido = 1
 

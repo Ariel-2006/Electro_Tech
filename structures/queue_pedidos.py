@@ -1,81 +1,44 @@
-# =============================================================
-#  ElectroTech Store — Cola FIFO de despacho de pedidos
-#  Archivo: structures/queue_pedidos.py
-#  Descripción: Gestiona el flujo de pedidos en orden de llegada.
-#               Primero en entrar = primero en ser despachado.
-#  PROHIBIDO: usar collections.deque o listas como cola.
-# =============================================================
-
 from data.models import Pedido
-
+from telegram.bot import enviar_pedido_recibido, enviar_alerta_stock
 
 class NodoPedido:
-    """Nodo de la cola. Contiene un Pedido y apunta al siguiente nodo."""
-
     def __init__(self, pedido: Pedido):
-        self.pedido    = pedido
-        self.siguiente = None   # Puntero al próximo nodo en la cola
-
+        self.pedido = pedido
+        self.siguiente = None
 
 class Cola:
-    """
-    Cola FIFO (First In, First Out) de pedidos.
-
-    Estructura interna:
-        frente → [Nodo1] → [Nodo2] → [Nodo3] → None
-                                          ↑
-                                        final
-
-    Métodos:
-        enqueue(pedido)     → Agrega al final          O(1)
-        dequeue() → Pedido  → Extrae del frente        O(1)
-        peek()    → Pedido  → Ve el frente sin extraer O(1)
-        esta_vacia() → bool                            O(1)
-        tamanio()    → int                             O(1)
-        listar_todos() → list  → Para visualización GUI O(n)
-    """
-
-    def __init__(self):
-        self._frente = None   # Primer nodo (próximo a despachar)
-        self._final  = None   # Último nodo (último en llegar)
+    def __init__(self, arbol_referencia): # Recibimos el arbol para buscar el producto
+        self._frente = None
+        self._final = None
         self._tamanio = 0
-
-    # ------------------------------------------------------------------
-    # ENQUEUE — Insertar al final
-    # ------------------------------------------------------------------
+        self.arbol = arbol_referencia # Guardamos la referencia
 
     def enqueue(self, pedido: Pedido):
-        """Agrega un pedido al final de la cola."""
         nuevo_nodo = NodoPedido(pedido)
         if self._final is None:
-            # Cola vacía: frente y final apuntan al mismo nodo
             self._frente = nuevo_nodo
-            self._final  = nuevo_nodo
+            self._final = nuevo_nodo
         else:
             self._final.siguiente = nuevo_nodo
-            self._final           = nuevo_nodo
+            self._final = nuevo_nodo
         self._tamanio += 1
-
-    # ------------------------------------------------------------------
-    # DEQUEUE — Extraer del frente
-    # ------------------------------------------------------------------
+        enviar_pedido_recibido(pedido.id_pedido, pedido.nombre_producto, pedido.cantidad, self._tamanio)
 
     def dequeue(self) -> Pedido | None:
-        """
-        Extrae y retorna el pedido del frente de la cola.
-        Retorna None si la cola está vacía.
-        """
         if self._frente is None:
             return None
 
-        pedido_extraido  = self._frente.pedido
-        self._frente     = self._frente.siguiente
-
-        # Si la cola quedó vacía, limpiar también el final
+        pedido_extraido = self._frente.pedido
+        self._frente = self._frente.siguiente
         if self._frente is None:
             self._final = None
-
         self._tamanio -= 1
+
+        # AHORA SÍ: Buscamos el producto en el árbol usando la referencia
+        producto = self.arbol.buscar(pedido_extraido.codigo_producto)
+        if producto and producto.tiene_stock_critico():
+             enviar_alerta_stock(producto.nombre, producto.codigo, producto.stock)
+             
         return pedido_extraido
 
     # ------------------------------------------------------------------
