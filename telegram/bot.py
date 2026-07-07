@@ -9,29 +9,28 @@ import os
 import urllib.parse
 import urllib.request
 
-
 def cargar_credenciales():
-  if os.path.exists(".env"):
-    with open(".env", "r", encoding="utf-8") as f:
-      for linea in f:
-        if "=" in linea and not linea.startswith("#"):
-          llave, valor = linea.strip().split("=", 1)
-          os.environ[llave] = valor
-
-  # Variables de entorno con claves de respaldo quemadas
-  token = os.getenv("TELEGRAM_TOKEN", "7914828466:AAGAfLgxRpqlrdVZRcVegPH5R1XQjDobiho")
-  chat_id = os.getenv("TELEGRAM_CHAT_ID", "-5351269085")
-  return token, chat_id
-
+    # 1. Intentar cargar desde el archivo .env (que NO se sube a GitHub)
+    if os.path.exists(".env"):
+        with open(".env", "r", encoding="utf-8") as f:
+            for linea in f:
+                if "=" in linea and not linea.startswith("#"):
+                    llave, valor = linea.strip().split("=", 1)
+                    os.environ[llave] = valor
+    
+    # 2. Obtener variables. Si no existen, devuelven None
+    token = os.getenv("TELEGRAM_TOKEN") 
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    return token, chat_id
 
 TOKEN, CHAT_ID = cargar_credenciales()
 
-
 def _enviar_mensaje_http(texto: str):
   """Disparador interno síncrono vía HTTP GET nativo."""
-  if not TOKEN or TOKEN.startswith("TU_TOKEN"):
-    print(f"[Telegram Simulado] {texto}")
-    return
+  if TOKEN is None or CHAT_ID is None:
+        print("[Info] Notificaciones de Telegram desactivadas (sin token).")
+        return
 
   try:
     texto_codificado = urllib.parse.quote(texto)
@@ -43,7 +42,7 @@ def _enviar_mensaje_http(texto: str):
     with urllib.request.urlopen(url, timeout=3.0) as response:
       pass
   except Exception as e:
-    print(f"[Error de Red Telegram] No se pudo enviar la notificación: {e}")
+        print(f"Error: {e}")
 
 
 # ------------------------------------------------------------------
