@@ -1,12 +1,5 @@
-# =============================================================
-#  ElectroTech Store — Árbol Binario de Búsqueda (BST)
-#  Archivo: structures/bst_productos.py
-#  Descripción: Almacena el catálogo de productos ordenado
-#               lexicográficamente por código alfanumérico.
-#               Ejemplo de orden: AUD-ACE-0001 < LAP-SAM-0001
-#  PROHIBIDO: usar estructuras nativas de Python como dict o set.
-# =============================================================
-
+# Almacena el catálogo de productos ordenado lexicográficamente por código alfanumérico.
+# Ejemplo de orden: AUD-ACE-0001 < LAP-SAM-0001
 from data.models import Producto
 
 
@@ -41,10 +34,7 @@ class ArbolBST:
         self._raiz  = None
         self._total = 0
 
-    # ------------------------------------------------------------------
-    # INSERTAR
-    # ------------------------------------------------------------------
-
+    # Función de inserción: agrega un producto al árbol, manteniendo el orden por código.
     def insertar(self, producto: Producto):
         """Inserta un producto en el árbol. Si el código ya existe, actualiza."""
         self._raiz = self._insertar_rec(self._raiz, producto)
@@ -62,10 +52,7 @@ class ArbolBST:
             nodo.producto = producto
         return nodo
 
-    # ------------------------------------------------------------------
-    # BUSCAR
-    # ------------------------------------------------------------------
-
+    # Función de búsqueda: retorna el producto con el código dado, o None si no existe.
     def buscar(self, codigo: str) -> Producto | None:
         """
         Busca un producto por su código alfanumérico.
@@ -83,10 +70,7 @@ class ArbolBST:
             return self._buscar_rec(nodo.izquierdo, codigo)
         return self._buscar_rec(nodo.derecho, codigo)
 
-    # ------------------------------------------------------------------
-    # ELIMINAR
-    # ------------------------------------------------------------------
-
+    # Función de eliminación: elimina un producto por su código, si existe.
     def eliminar(self, codigo: str) -> bool:
         """
         Elimina el nodo con ese código.
@@ -138,10 +122,7 @@ class ArbolBST:
             nodo = nodo.izquierdo
         return nodo
 
-    # ------------------------------------------------------------------
-    # RECORRIDOS
-    # ------------------------------------------------------------------
-
+    # Funciones de recorrido: inorden, preorden, postorden. Retornan listas de productos.
     def inorden(self) -> list:
         """Recorrido izquierda → raíz → derecha. Retorna lista ordenada por código."""
         resultado = []
@@ -181,10 +162,7 @@ class ArbolBST:
         self._postorden_rec(nodo.derecho, resultado)
         resultado.append(nodo.producto)
 
-    # ------------------------------------------------------------------
-    # UTILIDADES
-    # ------------------------------------------------------------------
-
+    # Funciones: altura, total, esta_vacio
     def altura(self) -> int:
         """Retorna la altura del árbol (número de niveles)."""
         return self._altura_rec(self._raiz)

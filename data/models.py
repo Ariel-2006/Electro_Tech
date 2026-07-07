@@ -1,10 +1,6 @@
-# =============================================================
-#  ElectroTech Store — Modelos de dominio
-#  Archivo: data/models.py
-#  Descripción: Clases base que usan TODOS los módulos del proyecto.
-#               NADIE redefine estas clases en otros archivos.
-# =============================================================
+#Clases base que usan TODOS los módulos del proyecto. No se modifican, solo se instancian y se usan.
 
+# Clase Producto: representa un producto en el catálogo de ElectroTech Store.
 class Producto:
     """
     Representa un producto en el catálogo de ElectroTech Store.
@@ -52,9 +48,7 @@ class Producto:
     def __repr__(self):
         return f"Producto(codigo='{self.codigo}', nombre='{self.nombre}', precio={self.precio}, stock={self.stock})"
 
-
-# -------------------------------------------------------------
-
+# Clase Pedido: representa un pedido en la Cola de despacho.
 class Pedido:
     """
     Representa un pedido en la Cola de despacho.
@@ -90,9 +84,8 @@ class Pedido:
         return (f"Pedido(id='{self.id_pedido}', producto='{self.codigo_producto}', "
                 f"cantidad={self.cantidad}, estado='{self.estado}')")
 
-
-# -------------------------------------------------------------
-
+# Clase RegistroTransaccional: representa un registro mínimo para la Pila de historial.
+# Función: almacenar solo lo necesario para deshacer un despacho, evitando duplicar objetos Producto completos en memoria.
 class RegistroTransaccional:
     """
     Registro mínimo que guarda la Pila de historial.

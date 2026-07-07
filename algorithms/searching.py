@@ -1,12 +1,8 @@
-# =============================================================
-#  ElectroTech Store — Algoritmos de búsqueda
-#  Archivo: algorithms/searching.py
-#  Descripción: Búsqueda binaria (sobre lista ordenada) y
-#               búsqueda lineal (por nombre parcial).
-# =============================================================
-
+# Búsquedas sobre listas de productos. Algoritmos de búsqueda lineal y binaria.
+# Búsqueda lineal para encontrar todos los productos cuyo nombre contenga un término.
+# Búsqueda binaria para encontrar un producto por código exacto en una lista ordenada.
 import time
-from data.models import Producto
+# from data.models import Producto
 
 
 def busqueda_binaria(lista_ordenada: list, codigo: str) -> tuple:

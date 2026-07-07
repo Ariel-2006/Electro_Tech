@@ -1,11 +1,4 @@
-# =============================================================
-#  ElectroTech Store — Algoritmos de ordenación
-#  Archivo: algorithms/sorting.py
-#  Descripción: BubbleSort, QuickSort y MergeSort implementados
-#               desde cero. Cada función retorna (lista_ordenada, tiempo_ms).
-#  PROHIBIDO: usar .sort(), sorted() o cualquier método nativo.
-# =============================================================
-
+# Módulo de algoritmos de ordenamiento para objetos Producto.
 import time
 from data.models import Producto
 
@@ -25,11 +18,8 @@ def _obtener_valor(producto: Producto, clave: str):
         return producto.stock
     return producto.precio  # default
 
-
-# ==================================================================
-# BUBBLE SORT  — O(n²) tiempo | O(1) espacio
-# ==================================================================
-
+# BUBBLE SORT
+# Funciona comparando pares adyacentes y moviendo el mayor al final en cada pasada. 
 def bubble_sort(lista: list, clave: str = "precio") -> tuple:
     """
     Ordena la lista de productos por la clave indicada usando BubbleSort.
@@ -64,11 +54,8 @@ def bubble_sort(lista: list, clave: str = "precio") -> tuple:
     tiempo_ms  = (fin - inicio) * 1000
     return datos, round(tiempo_ms, 4)
 
-
-# ==================================================================
-# QUICK SORT  — O(n log n) promedio | O(n²) peor caso | O(log n) espacio
-# ==================================================================
-
+# QUICK SORT
+# Funciona eligiendo un pivote, separando en menores y mayores, y ordenando recursivamente.
 def quick_sort(lista: list, clave: str = "precio") -> tuple:
     """
     Ordena la lista de productos usando QuickSort recursivo.
@@ -92,7 +79,6 @@ def quick_sort(lista: list, clave: str = "precio") -> tuple:
     tiempo_ms = (fin - inicio) * 1000
     return datos, round(tiempo_ms, 4)
 
-
 def _quick_sort_rec(datos: list, clave: str) -> list:
     """Implementación recursiva interna de QuickSort."""
     if len(datos) <= 1:
@@ -108,11 +94,8 @@ def _quick_sort_rec(datos: list, clave: str) -> list:
 
     return _quick_sort_rec(menores, clave) + iguales + _quick_sort_rec(mayores, clave)
 
-
-# ==================================================================
-# MERGE SORT  — O(n log n) siempre | O(n) espacio
-# ==================================================================
-# Ver si se necesita un merge_sort_inplace para ahorrar memoria, aunque es más complejo.
+# MERGE SORT
+# Funciona dividiendo la lista en mitades, ordenando cada mitad y fusionando.
 def merge_sort(lista: list, clave: str = "precio") -> tuple:
     """
     Ordena la lista de productos usando MergeSort.
@@ -167,11 +150,7 @@ def _merge(izq: list, der: list, clave: str) -> list:
     resultado.extend(der[j:])
     return resultado
 
-
-# ==================================================================
-# COMPARATIVA — ejecuta los 3 algoritmos y retorna resumen
-# ==================================================================
-
+# Comparativa de algoritmos
 def comparar_algoritmos(lista: list, clave: str = "precio") -> dict:
     """
     Ejecuta BubbleSort, QuickSort y MergeSort sobre la misma lista

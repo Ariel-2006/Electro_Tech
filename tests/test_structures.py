@@ -1,10 +1,6 @@
-# =============================================================
-#  ElectroTech Store — Pruebas unitarias
-#  Archivo: tests/test_structures.py + test_algorithms.py (combinado)
-#  Ejecutar: python -m pytest tests/ -v
-#            o: python tests/test_structures.py
-# =============================================================
-
+# Aquí se encuentran las pruebas unitarias para las estructuras de datos y algoritmos implementados 
+# en el proyecto ElectroTech Store.
+# Funciona como un "runner" manual que ejecuta cada prueba y reporta los resultados.
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,10 +13,7 @@ from algorithms.sorting        import bubble_sort, quick_sort, merge_sort
 from algorithms.searching      import busqueda_binaria, busqueda_lineal
 
 
-# ==================================================================
-# Datos de prueba
-# ==================================================================
-
+# Datos de prueba: lista de productos
 def crear_productos_prueba():
     return [
         Producto("LAP-SAM-0001", "Laptop Samsung",   899.99, 10),
@@ -31,10 +24,7 @@ def crear_productos_prueba():
     ]
 
 
-# ==================================================================
-# TEST: ÁRBOL BST
-# ==================================================================
-
+# Test: Árbol Binario de Búsqueda (BST) para productos
 def test_bst_insertar_y_buscar():
     arbol = ArbolBST()
     productos = crear_productos_prueba()
@@ -80,10 +70,7 @@ def test_bst_eliminar_no_existente():
     print("✅ BST eliminar no existente: OK")
 
 
-# ==================================================================
-# TEST: COLA FIFO
-# ==================================================================
-
+# Test: Cola FIFO para pedidos
 def test_cola_enqueue_dequeue():
     cola = Cola()
     p1 = Pedido("PED-00001", "LAP-SAM-0001", "Laptop Samsung", 2)
@@ -120,10 +107,7 @@ def test_cola_vacia():
     print("✅ Cola vacía: OK")
 
 
-# ==================================================================
-# TEST: PILA LIFO
-# ==================================================================
-
+# Test: Pila LIFO para historial de transacciones
 def test_pila_push_pop():
     pila = Pila()
     r1   = RegistroTransaccional("PED-00001", "LAP-SAM-0001", 2)
@@ -146,10 +130,7 @@ def test_pila_vacia():
     print("✅ Pila vacía: OK")
 
 
-# ==================================================================
-# TEST: ALGORITMOS DE ORDENACIÓN
-# ==================================================================
-
+# Test: Algoritmos de ordenamiento (Sorting)
 def test_bubble_sort():
     productos = crear_productos_prueba()
     ordenados, ms = bubble_sort(productos, "precio")
@@ -184,10 +165,7 @@ def test_sort_no_modifica_original():
     print("✅ Sort no modifica original: OK")
 
 
-# ==================================================================
-# TEST: ALGORITMOS DE BÚSQUEDA
-# ==================================================================
-
+# Test: Algoritmos de búsqueda (Searching)
 def test_busqueda_binaria_encontrado():
     productos = crear_productos_prueba()
     # Ordenar por código primero (requisito de búsqueda binaria)
@@ -222,10 +200,7 @@ def test_stock_critico():
     print("✅ Stock crítico: OK")
 
 
-# ==================================================================
-# RUNNER MANUAL
-# ==================================================================
-
+# Permite ejecutar este archivo directamente para correr todas las pruebas
 if __name__ == "__main__":
     print("\n" + "=" * 50)
     print("  PRUEBAS UNITARIAS — ElectroTech Store")

@@ -1,10 +1,11 @@
-# =============================================================
-#  ElectroTech Store — Panel Cola de Pedidos (FIFO)
-#  Archivo: gui/panel_pedidos.py
-# =============================================================
-
+#  ElectroTech Store — Panel Cola de Pedidos
 import customtkinter as ctk
 from data.models import Pedido, RegistroTransaccional
+from telegram.bot import (
+    enviar_pedido_recibido,
+    enviar_alerta_stock,
+    enviar_cierre_turno,
+)
 
 COLOR_ACCENT  = "#00c896"
 COLOR_BG      = "#0f1117"
@@ -32,7 +33,7 @@ class PanelPedidos(ctk.CTkFrame):
         self._refrescar_tabla()
 
     def _construir_ui(self):
-        # ── Encabezado ──
+        # Encabezado de la UI: título + info de la cola
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(1, weight=1)
@@ -46,7 +47,7 @@ class PanelPedidos(ctk.CTkFrame):
             font=ctk.CTkFont(size=11))
         self.lbl_cola_info.grid(row=0, column=1, padx=16, sticky="e")
 
-        # ── Formulario nuevo pedido ──
+        # Formulario nuevo pedido
         form = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         form.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
@@ -72,6 +73,9 @@ class PanelPedidos(ctk.CTkFrame):
         ctk.CTkButton(btn_frame, text="↩️ Deshacer", width=100,
                       fg_color="#7f1d1d",
                       command=self._deshacer).pack(side="left", padx=4)
+        ctk.CTkButton(btn_frame, text="🔔 Cerrar turno", width=120,
+                      fg_color="#0d9488",
+                      command=self._cerrar_turno).pack(side="left", padx=4)
 
         self.lbl_estado = ctk.CTkLabel(form, text="", text_color=COLOR_ACCENT,
                                         font=ctk.CTkFont(size=11))
@@ -97,10 +101,7 @@ class PanelPedidos(ctk.CTkFrame):
         self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         tabla_frame.grid_rowconfigure(1, weight=1)
 
-    # ------------------------------------------------------------------
-    # ACCIONES
-    # ------------------------------------------------------------------
-
+    # Acciones de los botones
     def _agregar_pedido(self):
         codigo   = self.entry_codigo.get().strip().upper()
         try:
@@ -127,6 +128,8 @@ class PanelPedidos(ctk.CTkFrame):
         id_pedido = self.app.nuevo_id_pedido()
         pedido    = Pedido(id_pedido, codigo, producto.nombre, cantidad)
         self.app.cola.enqueue(pedido)
+        # Llamada a la función de Telegram para notificar el pedido recibido
+        enviar_pedido_recibido(id_pedido, producto.nombre, cantidad, self.app.cola.tamanio())
 
         self._set_estado(f"✅  Pedido {id_pedido} agregado a la cola.", COLOR_ACCENT)
         self.entry_codigo.delete(0, "end")
@@ -143,8 +146,11 @@ class PanelPedidos(ctk.CTkFrame):
         # Reducir stock en el BST
         producto = self.app.arbol.buscar(pedido.codigo_producto)
         if producto:
-            producto.reducir_stock(pedido.cantidad)
-            # Alerta de stock crítico
+           producto.reducir_stock(pedido.cantidad)
+        # La alerta se revisa después de reducir el stock, para reflejar el stock actual
+        if producto.tiene_stock_critico():
+            enviar_alerta_stock(producto.nombre, producto.codigo, producto.stock)
+            # Mensaje en pantalla
             if producto.tiene_stock_critico():
                 self._set_estado(
                     f"🔴  Despachado {pedido.id_pedido} | "
@@ -157,13 +163,31 @@ class PanelPedidos(ctk.CTkFrame):
                     COLOR_ACCENT)
         else:
             self._set_estado(f"✅  Despachado {pedido.id_pedido} "
-                             f"(producto no encontrado en BST)", COLOR_INFO)
+                             f"Producto no encontrado en el catálogo", COLOR_INFO)
 
         # Registrar en la pila de historial
         registro = RegistroTransaccional(
             pedido.id_pedido, pedido.codigo_producto, pedido.cantidad)
         self.app.pila.push(registro)
         self._refrescar_tabla()
+
+    def _cerrar_turno(self):
+        """Envía a Telegram el resumen del turno (3er tipo de alerta)."""
+        despachados = self.app.pila.tamanio()
+        en_cola     = self.app.cola.tamanio()
+
+        # Buscar el producto con stock mínimo para alertar
+        producto_urgente = "Ninguno"
+        stock_minimo = None
+        # Bucle para encontrar el producto con stock mínimo en el BST
+        # .inorden() devuelve una lista de productos en orden ascendente por código
+        for p in self.app.arbol.inorden():
+            if stock_minimo is None or p.stock < stock_minimo:
+                stock_minimo = p.stock
+                producto_urgente = f"{p.nombre} ({p.stock} uds.)"
+
+        enviar_cierre_turno(despachados, en_cola, producto_urgente, 0.0)
+        self._set_estado("🔔  Resumen de cierre de turno enviado a Telegram.", COLOR_INFO)
 
     def _deshacer(self):
         """Deshace el último despacho: pop historial + repone stock en BST."""
@@ -195,10 +219,7 @@ class PanelPedidos(ctk.CTkFrame):
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
         self.lbl_estado.configure(text=msg, text_color=color)
 
-    # ------------------------------------------------------------------
-    # TABLA
-    # ------------------------------------------------------------------
-
+    # Tabla
     def _refrescar_tabla(self):
         for widget in self.scroll_tabla.winfo_children():
             widget.destroy()

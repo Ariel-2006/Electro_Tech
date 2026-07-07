@@ -1,12 +1,5 @@
-# =============================================================
-#  ElectroTech Store — Pila LIFO de historial de acciones
-#  Archivo: structures/stack_historial.py
-#  Descripción: Registra transacciones de despacho para poder
-#               deshacerlas. Guarda solo RegistroTransaccional
-#               [ID_Pedido, ID_Producto, Cantidad] para evitar
-#               duplicar objetos Producto completos en memoria.
-#  PROHIBIDO: usar listas nativas de Python como pila.
-# =============================================================
+# Registra transacciones de despacho para poder deshacerlas. Guarda solo RegistroTransaccional 
+# [ID_Pedido, ID_Producto, Cantidad] para evitar duplicar objetos Producto completos en memoria.
 
 from data.models import RegistroTransaccional
 
@@ -43,10 +36,7 @@ class Pila:
         self._cima     = None
         self._tamanio  = 0
 
-    # ------------------------------------------------------------------
-    # PUSH — Apilar
-    # ------------------------------------------------------------------
-
+    # Función para apilar un nuevo registro transaccional en la cima de la pila.
     def push(self, registro: RegistroTransaccional):
         """Apila un nuevo registro transaccional en la cima."""
         nuevo_nodo          = NodoPila(registro)
@@ -54,10 +44,7 @@ class Pila:
         self._cima          = nuevo_nodo
         self._tamanio      += 1
 
-    # ------------------------------------------------------------------
-    # POP — Desapilar
-    # ------------------------------------------------------------------
-
+    # Función para desapilar el registro de la cima de la pila y devolverlo.
     def pop(self) -> RegistroTransaccional | None:
         """
         Extrae y retorna el registro de la cima.
@@ -72,10 +59,7 @@ class Pila:
         self._tamanio    -= 1
         return registro_extraido
 
-    # ------------------------------------------------------------------
-    # PEEK — Ver sin extraer
-    # ------------------------------------------------------------------
-
+    # Función para ver el registro de la cima sin extraerlo.
     def peek(self) -> RegistroTransaccional | None:
         """
         Retorna el registro de la cima sin extraerlo.
@@ -85,10 +69,7 @@ class Pila:
             return None
         return self._cima.registro
 
-    # ------------------------------------------------------------------
-    # UTILIDADES
-    # ------------------------------------------------------------------
-
+    # Funciones: esta_vacia, tamanio, listar_todo, limpiar
     def esta_vacia(self) -> bool:
         return self._cima is None
 

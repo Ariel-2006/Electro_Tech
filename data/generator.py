@@ -1,19 +1,13 @@
-# =============================================================
-#  ElectroTech Store — Generador de datos sintéticos
-#  Archivo: data/generator.py
-#  Descripción: Genera 1,000+ productos y pedidos aleatorios
-#               usando solo el módulo random (sin faker).
-#               Los IDs son secuenciales: LAP-SAM-0001, CEL-XIA-0002...
-# =============================================================
-
+# Generador de datos sintéticos para la tienda ElectroTech.
 import random
 from data.models import Producto, Pedido
 
-# ------------------------------------------------------------------
-# Diccionarios de tipos y marcas con sus abreviaciones de 3 letras
-# Regla: si tiene menos de 3 letras → rellenar con guion bajo (_)
-# ------------------------------------------------------------------
+# Diccionarios de códigos para tipos y marcas de productos para generar códigos alfanuméricos únicos.
 
+# Los códigos se forman con 3 letras para el tipo, 3 letras para la marca y un número secuencial de 4 dígitos.
+
+# El _ en algunos códigos de marca (como LG_) se usa para mantener el formato de 3 caracteres en caso de que 
+# la marca tenga menos de 3 letras cuando se ingresa por teclado.
 TIPOS: dict[str, str] = {
     "Laptop":      "LAP",
     "Monitor":     "MON",

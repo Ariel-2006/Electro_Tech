@@ -1,10 +1,5 @@
-# =============================================================
-#  ElectroTech Store — Ventana principal
-#  Archivo: gui/app.py
-#  Descripción: Ventana principal con menú lateral y 4 paneles.
-#               Instancia las estructuras y las comparte con todos
-#               los paneles (única fuente de verdad).
-# =============================================================
+# Descripción: Ventana principal con menú lateral y 4 paneles.
+# Instancia las estructuras y las comparte con todos los paneles.
 
 import customtkinter as ctk
 import threading
@@ -18,8 +13,6 @@ from gui.panel_productos   import PanelProductos
 from gui.panel_pedidos     import PanelPedidos
 from gui.panel_algoritmos  import PanelAlgoritmos
 from gui.panel_generador   import PanelGenerador
-
-from telegram.bot import enviar_cierre_turno
 
 # Tema global
 ctk.set_appearance_mode("dark")
@@ -49,7 +42,7 @@ class AppElectroTech(ctk.CTk):
 
         # ------ Estructuras de datos (compartidas por todos los paneles) ------
         self.arbol  = ArbolBST()
-        self.cola = Cola(self.arbol)
+        self.cola = Cola()
         self.pila   = Pila()
         self._contador_pedido = 1
 
@@ -66,10 +59,7 @@ class AppElectroTech(ctk.CTk):
         self._registrar_botones()
         self.mostrar_panel("productos")
 
-    # ------------------------------------------------------------------
-    # SIDEBAR
-    # ------------------------------------------------------------------
-
+    # Sidebar: ayuda a navegar entre paneles y muestra estadísticas rápidas
     def _construir_sidebar(self):
         sidebar = ctk.CTkFrame(self, width=220, fg_color=COLOR_SIDEBAR,
                                corner_radius=0)
@@ -139,10 +129,7 @@ class AppElectroTech(ctk.CTk):
             "generador":  self._btn_generador,
         }
 
-    # ------------------------------------------------------------------
-    # ÁREA DE CONTENIDO
-    # ------------------------------------------------------------------
-
+    # Área de contenido: aquí se renderiza el panel activo (productos, pedidos, algoritmos o generador)
     def _construir_area_contenido(self):
         self.frame_contenido = ctk.CTkFrame(self, fg_color=COLOR_BG,
                                              corner_radius=0)
@@ -151,10 +138,7 @@ class AppElectroTech(ctk.CTk):
         self.frame_contenido.grid_rowconfigure(0, weight=1)
         self._panel_widget_actual = None
 
-    # ------------------------------------------------------------------
-    # NAVEGACIÓN
-    # ------------------------------------------------------------------
-
+    # Navegación entre paneles: destruye el panel actual y renderiza el nuevo
     def mostrar_panel(self, panel_id: str):
         """Destruye el panel actual y renderiza el nuevo."""
         if self._panel_widget_actual is not None:
@@ -184,10 +168,7 @@ class AppElectroTech(ctk.CTk):
         self._panel_activo = panel_id
         self.actualizar_stats()
 
-    # ------------------------------------------------------------------
-    # ESTADÍSTICAS SIDEBAR
-    # ------------------------------------------------------------------
-
+    # Actualización de estadísticas rápidas en el sidebar
     def actualizar_stats(self):
         """Actualiza los contadores del sidebar."""
         self.lbl_stat_arbol.configure(
@@ -197,10 +178,7 @@ class AppElectroTech(ctk.CTk):
         self.lbl_stat_pila.configure(
             text=f"Historial: {self.pila.tamanio()} registros")
 
-    # ------------------------------------------------------------------
-    # HELPER COMPARTIDO — generar ID de pedido
-    # ------------------------------------------------------------------
-
+    # Ayuda a generar un nuevo ID de pedido único y secuencial
     def nuevo_id_pedido(self) -> str:
         id_str = f"PED-{self._contador_pedido:05d}"
         self._contador_pedido += 1

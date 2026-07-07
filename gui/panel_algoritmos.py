@@ -1,8 +1,4 @@
-# =============================================================
-#  ElectroTech Store — Panel Algoritmos (Ordenación + Búsqueda)
-#  Archivo: gui/panel_algoritmos.py
-# =============================================================
-
+# Panel de comparación de algoritmos de ordenación y búsqueda para la GUI.
 import customtkinter as ctk
 from algorithms.sorting   import bubble_sort, quick_sort, merge_sort, comparar_algoritmos
 from algorithms.searching import busqueda_binaria, busqueda_lineal
@@ -135,10 +131,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         lbl.pack(pady=(0, 8))
         return lbl
 
-    # ------------------------------------------------------------------
-    # ORDENACIÓN
-    # ------------------------------------------------------------------
-
+   # Ordenación y comparación de algoritmos
     def _obtener_lista(self) -> list:
         return self.app.arbol.inorden()
 
@@ -159,13 +152,16 @@ class PanelAlgoritmos(ctk.CTkFrame):
         self.lbl_merge.configure( text=f"{t_m} ms")
 
         minimo = min(t_b, t_q, t_m)
-        ganador = "BubbleSort" if minimo == t_b else ("QuickSort" if minimo == t_q else "MergeSort")
+        if minimo == t_b:
+            ganador = "BubbleSort"
+        elif minimo == t_q:
+            ganador = "QuickSort"
+        else:
+            ganador = "MergeSort"
+        
         self.lbl_ganador.configure(
             text=f"🏆 Más rápido: {ganador} con {minimo} ms ordenando {len(lista)} productos por {clave}",
             text_color=COLOR_ACCENT)
-
-        # Guardar la lista del QuickSort como referencia para búsqueda binaria
-        self._lista_ordenada = resultado["quick"]["lista"]
 
     def _ordenar(self, algoritmo: str):
         lista = self._obtener_lista()
@@ -188,10 +184,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
             text=f"Ordenados {len(datos)} productos por {clave} en {ms} ms",
             text_color=COLOR_SUBTEXT)
 
-    # ------------------------------------------------------------------
-    # BÚSQUEDA
-    # ------------------------------------------------------------------
-
+    # Búsqueda de productos por código (binaria) o nombre (lineal)
     def _buscar_binaria(self):
         codigo = self.entry_bin.get().strip().upper()
         if not codigo:

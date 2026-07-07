@@ -1,10 +1,4 @@
-# =============================================================
-#  ElectroTech Store — Panel Generador Masivo de Datos
-#  Archivo: gui/panel_generador.py
-#  Descripción: Genera 1,000+ productos/pedidos en un hilo
-#               separado (threading) para que la GUI no se congele.
-# =============================================================
-
+#Genera 1,000+ productos/pedidos en un hilo separado para no congelar la GUI. Muestra barra de progreso y log de resultados.
 import customtkinter as ctk
 import threading
 import time
@@ -18,7 +12,8 @@ COLOR_SUBTEXT = "#94a3b8"
 COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 
-
+# Clase PanelGenerador: permite generar datos sintéticos masivos (productos y pedidos) 
+# en un hilo separado para no congelar la GUI. Muestra barra de progreso y log de resultados.
 class PanelGenerador(ctk.CTkFrame):
     """
     Panel de carga masiva de datos sintéticos.
@@ -109,10 +104,7 @@ class PanelGenerador(ctk.CTkFrame):
 
         self._log("Sistema iniciado. Presiona 'GENERAR AHORA' para cargar datos masivos.")
 
-    # ------------------------------------------------------------------
-    # GENERACIÓN EN HILO SEPARADO
-    # ------------------------------------------------------------------
-
+    # Genera productos y pedidos en un hilo separado para no congelar la GUI
     def _iniciar_generacion(self):
         if self._generando:
             return
