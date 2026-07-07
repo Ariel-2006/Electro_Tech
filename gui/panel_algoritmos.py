@@ -1,5 +1,6 @@
 # Panel de comparación de algoritmos de ordenación y búsqueda para la GUI.
 import customtkinter as ctk
+from tkinter import messagebox
 from algorithms.sorting   import bubble_sort, quick_sort, merge_sort, comparar_algoritmos
 from algorithms.searching import busqueda_binaria, busqueda_lineal
 
@@ -138,7 +139,10 @@ class PanelAlgoritmos(ctk.CTkFrame):
     def _comparar(self):
         lista = self._obtener_lista()
         if not lista:
-            self.lbl_ganador.configure(text="⚠️  El catálogo está vacío.", text_color=COLOR_WARN)
+            self.bell()
+            messagebox.showinfo("Catálogo vacío",
+                "No hay productos para ordenar.\n"
+                "Ve al panel Generador y carga datos primero.")
             return
         clave    = self.combo_clave.get()
         resultado = comparar_algoritmos(lista, clave)
@@ -188,6 +192,10 @@ class PanelAlgoritmos(ctk.CTkFrame):
     def _buscar_binaria(self):
         codigo = self.entry_bin.get().strip().upper()
         if not codigo:
+            self.bell()
+            messagebox.showwarning("Campo vacío",
+                "Ingresa un código exacto para la búsqueda binaria.\n"
+                "Ejemplo: LAP-SAM-0001")
             return
 
         # La búsqueda binaria requiere lista ordenada por código
@@ -211,6 +219,10 @@ class PanelAlgoritmos(ctk.CTkFrame):
     def _buscar_lineal(self):
         termino = self.entry_lin.get().strip()
         if not termino:
+            self.bell()
+            messagebox.showwarning("Campo vacío",
+                "Ingresa un término parcial para la búsqueda lineal.\n"
+                "Ejemplo: Samsung, Laptop, Xiaomi")
             return
 
         lista = self.app.arbol.inorden()

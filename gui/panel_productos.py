@@ -1,7 +1,6 @@
-# Este panel nos permite gestionar el catálogo de productos de la tienda. 
-# Muestra el árbol BST como tabla dinámica (recorrido inorden) y permite 
-# insertar, buscar y eliminar productos individualmente.
+# Panel de catálogo de productos (BST) - GUI
 import customtkinter as ctk
+from tkinter import messagebox
 from data.models import Producto
 
 COLOR_ACCENT  = "#00c896"
@@ -12,7 +11,7 @@ COLOR_SUBTEXT = "#94a3b8"
 COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 
-# Clase PanelProductos: permite gestionar el catálogo de productos de la tienda.
+
 class PanelProductos(ctk.CTkFrame):
     """
     Panel del catálogo de productos.
@@ -24,12 +23,16 @@ class PanelProductos(ctk.CTkFrame):
         self.app = app
         self.pagina = 0
         self.items_por_pag = 20
+        self.grid_columnconfigure(0, weight=1)
         self._construir_ui()
         self._refrescar_tabla()
 
-    # UI: formulario de inserción/búsqueda/eliminación y tabla dinámica con paginación
+    # ------------------------------------------------------------------
+    # UI
+    # ------------------------------------------------------------------
+
     def _construir_ui(self):
-        # Encabezado de la sección
+        # ── Encabezado ──
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(1, weight=1)
@@ -43,7 +46,7 @@ class PanelProductos(ctk.CTkFrame):
             text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=11))
         self.lbl_info_arbol.grid(row=0, column=1, padx=16, sticky="e")
 
-        # ── Formulario ──
+        # ── Formulario (2 filas: campos arriba, botones abajo) ──
         form = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         form.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
@@ -52,14 +55,14 @@ class PanelProductos(ctk.CTkFrame):
 
         for i, (label, attr) in enumerate(campos):
             ctk.CTkLabel(form, text=label, text_color=COLOR_SUBTEXT,
-                         font=ctk.CTkFont(size=11)).grid(row=0, column=i*2, padx=(16,4), pady=10)
-            entry = ctk.CTkEntry(form, width=140, placeholder_text=label)
-            entry.grid(row=0, column=i*2+1, padx=(0,12), pady=10)
+                         font=ctk.CTkFont(size=11)).grid(row=0, column=i*2, padx=(16, 4), pady=(10, 4))
+            entry = ctk.CTkEntry(form, width=130, placeholder_text=label)
+            entry.grid(row=0, column=i*2+1, padx=(0, 8), pady=(10, 4))
             setattr(self, attr, entry)
 
-        # Botones
+        # Botones en fila separada para que no se salgan de la pantalla
         btn_frame = ctk.CTkFrame(form, fg_color="transparent")
-        btn_frame.grid(row=0, column=8, padx=10)
+        btn_frame.grid(row=1, column=0, columnspan=8, pady=(4, 4))
 
         ctk.CTkButton(btn_frame, text="➕ Insertar", width=100,
                       fg_color=COLOR_ACCENT, text_color="#000",
@@ -77,11 +80,11 @@ class PanelProductos(ctk.CTkFrame):
         # Mensaje de estado
         self.lbl_estado = ctk.CTkLabel(form, text="", text_color=COLOR_ACCENT,
                                         font=ctk.CTkFont(size=11))
-        self.lbl_estado.grid(row=1, column=0, columnspan=9, pady=(0,8))
+        self.lbl_estado.grid(row=2, column=0, columnspan=8, pady=(0, 8))
 
-        # Tabla dinámica con scroll y paginación
+        # ── Tabla ──
         tabla_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
-        tabla_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5,20))
+        tabla_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5, 20))
         tabla_frame.grid_columnconfigure(0, weight=1)
         tabla_frame.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -90,7 +93,7 @@ class PanelProductos(ctk.CTkFrame):
         cols = [("Código", 160), ("Nombre", 240), ("Precio $", 110),
                 ("Stock", 80), ("Estado stock", 120)]
         hdr = ctk.CTkFrame(tabla_frame, fg_color="#111827", corner_radius=8)
-        hdr.grid(row=0, column=0, sticky="ew", padx=8, pady=(8,0))
+        hdr.grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 0))
         for i, (col, w) in enumerate(cols):
             ctk.CTkLabel(hdr, text=col, width=w,
                          font=ctk.CTkFont(size=11, weight="bold"),
@@ -99,10 +102,10 @@ class PanelProductos(ctk.CTkFrame):
         # Scroll
         self.scroll_tabla = ctk.CTkScrollableFrame(
             tabla_frame, fg_color="transparent", corner_radius=0)
-        self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0,8))
+        self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         tabla_frame.grid_rowconfigure(1, weight=1)
 
-        # Barra de paginación que permite navegar entre páginas de productos
+        # ── Barra de paginación ──
         barra_pag = ctk.CTkFrame(tabla_frame, fg_color="transparent")
         barra_pag.grid(row=2, column=0, sticky="ew", padx=8, pady=(0, 8))
 
@@ -119,19 +122,40 @@ class PanelProductos(ctk.CTkFrame):
                       fg_color="#374151", hover_color="#4b5563",
                       command=lambda: self._cambiar_pagina(1)).pack(side="right", padx=4)
 
-    # Acciones de los botones del formulario
+    # ------------------------------------------------------------------
+    # ACCIONES
+    # ------------------------------------------------------------------
+
     def _insertar(self):
         codigo = self.entry_codigo.get().strip().upper()
         nombre = self.entry_nombre.get().strip()
-        try:
-            precio = float(self.entry_precio.get().strip())
-            stock  = int(self.entry_stock.get().strip())
-        except ValueError:
-            self._set_estado("⚠️  Precio y Stock deben ser numéricos.", COLOR_ERROR)
+        precio_txt = self.entry_precio.get().strip()
+        stock_txt  = self.entry_stock.get().strip()
+
+        if not codigo or not nombre or not precio_txt or not stock_txt:
+            self.bell()
+            messagebox.showwarning("Campos incompletos",
+                "Para insertar un producto debes llenar los 4 campos:\n"
+                "Código, Nombre, Precio y Stock.")
             return
 
-        if not codigo or not nombre:
-            self._set_estado("⚠️  Código y Nombre son obligatorios.", COLOR_ERROR)
+        try:
+            precio = float(precio_txt)
+            stock  = int(stock_txt)
+        except ValueError:
+            self.bell()
+            messagebox.showerror("Datos inválidos",
+                "Precio debe ser un número decimal y Stock un número entero.")
+            return
+
+        if precio <= 0:
+            self.bell()
+            messagebox.showwarning("Precio inválido", "El precio debe ser mayor a 0.")
+            return
+
+        if stock < 0:
+            self.bell()
+            messagebox.showwarning("Stock inválido", "El stock no puede ser negativo.")
             return
 
         producto = Producto(codigo, nombre, precio, stock)
@@ -143,7 +167,9 @@ class PanelProductos(ctk.CTkFrame):
     def _buscar(self):
         codigo = self.entry_codigo.get().strip().upper()
         if not codigo:
-            self._set_estado("⚠️  Ingresa un código para buscar.", COLOR_WARN)
+            self.bell()
+            messagebox.showwarning("Campo vacío",
+                "Ingresa un código en el campo 'Código' para buscar.")
             return
         p = self.app.arbol.buscar(codigo)
         if p:
@@ -155,12 +181,16 @@ class PanelProductos(ctk.CTkFrame):
             self.entry_stock.insert(0, str(p.stock))
             self._set_estado(f"🔍  Producto {codigo} encontrado en el BST.", COLOR_ACCENT)
         else:
-            self._set_estado(f"❌  Código {codigo} no encontrado en el BST.", COLOR_ERROR)
+            self.bell()
+            messagebox.showinfo("No encontrado",
+                f"El código {codigo} no existe en el catálogo.")
 
     def _eliminar(self):
         codigo = self.entry_codigo.get().strip().upper()
         if not codigo:
-            self._set_estado("⚠️  Ingresa el código del producto a eliminar.", COLOR_WARN)
+            self.bell()
+            messagebox.showwarning("Campo vacío",
+                "Ingresa el código del producto a eliminar en el campo 'Código'.")
             return
         ok = self.app.arbol.eliminar(codigo)
         if ok:
@@ -168,7 +198,9 @@ class PanelProductos(ctk.CTkFrame):
             self._limpiar_form()
             self._refrescar_tabla()
         else:
-            self._set_estado(f"❌  Código {codigo} no existe en el BST.", COLOR_ERROR)
+            self.bell()
+            messagebox.showerror("No existe",
+                f"El código {codigo} no existe en el BST. No se puede eliminar.")
 
     def _limpiar_form(self):
         for attr in ("entry_codigo", "entry_nombre", "entry_precio", "entry_stock"):
@@ -176,32 +208,34 @@ class PanelProductos(ctk.CTkFrame):
 
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
         self.lbl_estado.configure(text=msg, text_color=color)
-    # Funciones de paginación: calcular total de páginas y cambiar página
+
+    # ------------------------------------------------------------------
+    # PAGINACIÓN
+    # ------------------------------------------------------------------
+
     def _total_paginas(self) -> int:
-            """Número de páginas según cuántos productos hay en el BST."""
-            total = self.app.arbol.total()
-            if total == 0:
-                return 1
-            return (total - 1) // self.items_por_pag + 1
+        total = self.app.arbol.total()
+        if total == 0:
+            return 1
+        return (total - 1) // self.items_por_pag + 1
 
     def _cambiar_pagina(self, delta: int):
-        """Avanza (+1) o retrocede (-1) de página sin salirse del rango."""
         nueva_pagina = self.pagina + delta
         if 0 <= nueva_pagina < self._total_paginas():
             self.pagina = nueva_pagina
             self._refrescar_tabla()
-    # Tabla dinámica: refrescar contenido según el recorrido inorden del BST
-    # Implementa paginación para mostrar solo un subconjunto de productos por página.
+
+    # ------------------------------------------------------------------
+    # TABLA DINÁMICA
+    # ------------------------------------------------------------------
+
     def _refrescar_tabla(self):
-        """Limpia y redibuja la tabla con el recorrido inorden del BST."""
         for widget in self.scroll_tabla.winfo_children():
             widget.destroy()
 
-        # Traer la lista ordenada (inorden) y mostrar SOLO la página actual
         lista_total = self.app.arbol.inorden()
         total_items = len(lista_total)
 
-        # Ajustar la página si quedó fuera de rango (por ejemplo, tras eliminar)
         if self.pagina >= self._total_paginas():
             self.pagina = self._total_paginas() - 1
 
@@ -209,13 +243,12 @@ class PanelProductos(ctk.CTkFrame):
         fin = inicio + self.items_por_pag
         productos_pagina = lista_total[inicio:fin]
 
-        # Actualizar la etiqueta de paginación
         if total_items == 0:
             self.lbl_paginacion.configure(text="Sin productos")
         else:
             self.lbl_paginacion.configure(
                 text=f"Página {self.pagina + 1} de {self._total_paginas()}"
-                     f"   ·   mostrando {inicio + 1}-{min(fin, total_items)} de {total_items}")
+                     f"   ·   mostrando {inicio + 1}–{min(fin, total_items)} de {total_items}")
 
         for idx, p in enumerate(productos_pagina):
             color_fila = "#111827" if idx % 2 == 0 else "#0f1117"
@@ -233,7 +266,6 @@ class PanelProductos(ctk.CTkFrame):
                 ctk.CTkLabel(fila, text=val, width=w, text_color=col,
                              font=ctk.CTkFont(size=11)).grid(row=0, column=i, padx=4, pady=5)
 
-        # Actualizar info del árbol
         self.lbl_info_arbol.configure(
             text=f"BST: {self.app.arbol.total()} productos | "
                  f"Altura: {self.app.arbol.altura()} niveles")

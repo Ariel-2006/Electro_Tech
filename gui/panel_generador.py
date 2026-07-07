@@ -1,5 +1,6 @@
-#Genera 1,000+ productos/pedidos en un hilo separado para no congelar la GUI. Muestra barra de progreso y log de resultados.
+# Panel de generador masivo de datos sintéticos: productos y pedidos.
 import customtkinter as ctk
+from tkinter import messagebox
 import threading
 import time
 from data.generator import generar_todo
@@ -12,8 +13,7 @@ COLOR_SUBTEXT = "#94a3b8"
 COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 
-# Clase PanelGenerador: permite generar datos sintéticos masivos (productos y pedidos) 
-# en un hilo separado para no congelar la GUI. Muestra barra de progreso y log de resultados.
+
 class PanelGenerador(ctk.CTkFrame):
     """
     Panel de carga masiva de datos sintéticos.
@@ -70,6 +70,14 @@ class PanelGenerador(ctk.CTkFrame):
             command=self._iniciar_generacion)
         self.btn_generar.grid(row=0, column=6, padx=20)
 
+        # Nota informativa
+        ctk.CTkLabel(ctrl,
+                     text="ℹ️  Los pedidos no pueden superar la cantidad de productos "
+                          "(un negocio no puede recibir más pedidos que productos en catálogo).",
+                     text_color=COLOR_SUBTEXT,
+                     font=ctk.CTkFont(size=10)).grid(
+            row=1, column=0, columnspan=7, padx=16, pady=(0, 8))
+
         # ── Barra de progreso ──
         prog_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         prog_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=5)
@@ -104,7 +112,10 @@ class PanelGenerador(ctk.CTkFrame):
 
         self._log("Sistema iniciado. Presiona 'GENERAR AHORA' para cargar datos masivos.")
 
-    # Genera productos y pedidos en un hilo separado para no congelar la GUI
+    # ------------------------------------------------------------------
+    # GENERACIÓN EN HILO SEPARADO
+    # ------------------------------------------------------------------
+
     def _iniciar_generacion(self):
         if self._generando:
             return
@@ -112,12 +123,37 @@ class PanelGenerador(ctk.CTkFrame):
             n_prod = int(self.entry_n.get().strip())
             n_ped  = int(self.entry_p.get().strip())
         except ValueError:
-            self._log("⚠️  Valores inválidos. Usa números enteros.", COLOR_WARN)
+            self.bell()
+            messagebox.showerror("Valores inválidos",
+                "Los campos 'Productos a generar' y 'Pedidos a encolar'\n"
+                "deben ser números enteros.\n"
+                "Ejemplo: 1000 productos, 500 pedidos.")
             return
 
         if n_prod < 1:
-            self._log("⚠️  Debes generar al menos 1 producto.", COLOR_WARN)
+            self.bell()
+            messagebox.showwarning("Cantidad inválida",
+                "Debes generar al menos 1 producto.")
             return
+
+        if n_ped < 0:
+            self.bell()
+            messagebox.showwarning("Cantidad inválida",
+                "Los pedidos no pueden ser un número negativo.")
+            return
+
+        # Validación de negocio: no puede haber más pedidos que productos
+        if n_ped > n_prod:
+            self.bell()
+            messagebox.showwarning("Pedidos exceden productos",
+                f"Ingresaste {n_ped} pedidos pero solo {n_prod} productos.\n\n"
+                "En un negocio real no se pueden recibir más pedidos\n"
+                "que productos disponibles en catálogo.\n\n"
+                f"Máximo permitido de pedidos: {n_prod}.\n"
+                "Se ajustará automáticamente.")
+            n_ped = n_prod
+            self.entry_p.delete(0, "end")
+            self.entry_p.insert(0, str(n_ped))
 
         self._generando = True
         self.btn_generar.configure(state="disabled", text="⏳ Generando...")
