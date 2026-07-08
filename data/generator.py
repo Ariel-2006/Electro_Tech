@@ -94,7 +94,7 @@ def generar_productos(n: int = 1000) -> list:
 
         precio_min, precio_max = RANGOS_PRECIO[tipo]
         precio = round(random.uniform(precio_min, precio_max), 2)
-        stock  = random.randint(0, 200)
+        stock  = random.randint(0, 50)
 
         productos.append(Producto(codigo, nombre, precio, stock))
 
