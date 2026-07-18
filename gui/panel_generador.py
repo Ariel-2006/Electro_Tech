@@ -31,7 +31,7 @@ class PanelGenerador(ctk.CTkFrame):
         # ── Encabezado ──
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
-        ctk.CTkLabel(header, text="🎲  Generador Masivo de Datos Sintéticos",
+        ctk.CTkLabel(header, text="🎲  Generador de Datos Sintéticos",
                      font=ctk.CTkFont(size=18, weight="bold"),
                      text_color=COLOR_ACCENT).pack(side="left", padx=16, pady=12)
 
@@ -75,7 +75,7 @@ class PanelGenerador(ctk.CTkFrame):
                      text="ℹ️  Los pedidos no pueden superar la cantidad de productos "
                           "(un negocio no puede recibir más pedidos que productos en catálogo).",
                      text_color=COLOR_SUBTEXT,
-                     font=ctk.CTkFont(size=10)).grid(
+                     font=ctk.CTkFont(size=12)).grid(
             row=1, column=0, columnspan=7, padx=16, pady=(0, 8))
 
         # ── Barra de progreso ──

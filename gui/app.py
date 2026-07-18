@@ -34,19 +34,24 @@ class AppElectroTech(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # ------ Configuración ventana ------
+        # Configuración de la ventana
         self.title("⚡ ElectroTech Store — Gestión de Inventario")
         self.geometry("1200x700")
         self.minsize(1100, 650)
         self.configure(fg_color=COLOR_BG)
 
-        # ------ Estructuras de datos (compartidas por todos los paneles) ------
+        # Instancias de estructuras de datos compartidas entre paneles
         self.arbol  = ArbolBST()
         self.cola = Cola()
         self.pila   = Pila()
         self._contador_pedido = 1
 
-        # ------ Layout principal: sidebar + contenido ------
+        # Variables de estado para mostrar estadísticas rápidas en el sidebar
+        self.ultimo_tiempo_ms = 0.0
+        self.ultimo_algoritmo = "—"
+
+
+        # Layout: 2 columnas (sidebar + área de contenido)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -102,7 +107,7 @@ class AppElectroTech(ctk.CTk):
         # Créditos
         ctk.CTkLabel(sidebar,
                      text="Freddy · Zuly · Ariel · Wendy",
-                     font=ctk.CTkFont(size=9),
+                     font=ctk.CTkFont(size=12),
                      text_color="#475569").place(relx=0.5, rely=0.97, anchor="s")
 
     def _boton_menu(self, parent, texto: str, panel_id: str) -> ctk.CTkButton:

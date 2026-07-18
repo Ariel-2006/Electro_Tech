@@ -24,7 +24,6 @@ class PanelPedidos(ctk.CTkFrame):
     Visualiza la cola FIFO en tiempo real con paginación.
     Permite agregar pedidos manuales, despachar (dequeue) y deshacer.
     """
-
     def __init__(self, parent, app):
         super().__init__(parent, fg_color=COLOR_BG, corner_radius=0)
         self.app = app
@@ -36,12 +35,12 @@ class PanelPedidos(ctk.CTkFrame):
         self._refrescar_tabla()
 
     def _construir_ui(self):
-        # ── Encabezado ──
+        # Encabezado con título y estado de la cola
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(header, text="📦  Cola de Despacho (FIFO)",
+        ctk.CTkLabel(header, text="📦  Cola de Despacho",
                      font=ctk.CTkFont(size=18, weight="bold"),
                      text_color=COLOR_ACCENT).grid(row=0, column=0, padx=16, pady=12, sticky="w")
 
@@ -50,17 +49,17 @@ class PanelPedidos(ctk.CTkFrame):
             font=ctk.CTkFont(size=11))
         self.lbl_cola_info.grid(row=0, column=1, padx=16, sticky="e")
 
-        # ── Formulario nuevo pedido ──
+        # Botones de acción: agregar, despachar, deshacer, cerrar turno
         form = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         form.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
         ctk.CTkLabel(form, text="Código producto:", text_color=COLOR_SUBTEXT,
-                     font=ctk.CTkFont(size=11)).grid(row=0, column=0, padx=16, pady=10)
+                     font=ctk.CTkFont(size=12)).grid(row=0, column=0, padx=16, pady=10)
         self.entry_codigo = ctk.CTkEntry(form, width=160, placeholder_text="LAP-SAM-0001")
         self.entry_codigo.grid(row=0, column=1, padx=8)
 
         ctk.CTkLabel(form, text="Cantidad:", text_color=COLOR_SUBTEXT,
-                     font=ctk.CTkFont(size=11)).grid(row=0, column=2, padx=8)
+                     font=ctk.CTkFont(size=12)).grid(row=0, column=2, padx=8)
         self.entry_cantidad = ctk.CTkEntry(form, width=80, placeholder_text="1")
         self.entry_cantidad.grid(row=0, column=3, padx=8)
 
@@ -70,16 +69,20 @@ class PanelPedidos(ctk.CTkFrame):
         ctk.CTkButton(btn_frame, text="🔎 Elegir del catálogo", width=150,
                       fg_color="#6d28d9",
                       command=self._abrir_selector).pack(side="left", padx=4)
+        
         ctk.CTkButton(btn_frame, text="➕ Agregar pedido", width=130,
                       fg_color=COLOR_ACCENT, text_color="#000",
                       command=self._agregar_pedido).pack(side="left", padx=4)
-        ctk.CTkButton(btn_frame, text="⚡ Despachar", width=120,
+        
+        ctk.CTkButton(btn_frame, text="⚡ Despachar", width=110,
                       fg_color="#1e40af",
                       command=self._despachar).pack(side="left", padx=4)
+        
         ctk.CTkButton(btn_frame, text="↩️ Deshacer", width=100,
                       fg_color="#7f1d1d",
                       command=self._deshacer).pack(side="left", padx=4)
-        ctk.CTkButton(btn_frame, text="🔔 Cerrar turno", width=120,
+        
+        ctk.CTkButton(btn_frame, text="🔔 Cerrar turno", width=100,
                       fg_color="#0d9488",
                       command=self._cerrar_turno).pack(side="left", padx=4)
 
@@ -88,14 +91,14 @@ class PanelPedidos(ctk.CTkFrame):
                      text="ℹ️  Solo 'Agregar pedido' requiere código y cantidad. "
                           "Los demás botones operan sin llenar campos.",
                      text_color=COLOR_SUBTEXT,
-                     font=ctk.CTkFont(size=10)).grid(
+                     font=ctk.CTkFont(size=12)).grid(
             row=1, column=0, columnspan=5, pady=(0, 2))
 
         self.lbl_estado = ctk.CTkLabel(form, text="", text_color=COLOR_ACCENT,
                                         font=ctk.CTkFont(size=11))
         self.lbl_estado.grid(row=2, column=0, columnspan=5, pady=(0, 8))
 
-        # ── Tabla cola ──
+        # Tabla de pedidos con scroll y paginación
         tabla_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         tabla_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5, 20))
         tabla_frame.grid_columnconfigure(0, weight=1)
@@ -107,7 +110,7 @@ class PanelPedidos(ctk.CTkFrame):
         hdr.grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 0))
         for i, (col, w) in enumerate(cols):
             ctk.CTkLabel(hdr, text=col, width=w,
-                         font=ctk.CTkFont(size=11, weight="bold"),
+                         font=ctk.CTkFont(size=12, weight="bold"),
                          text_color=COLOR_ACCENT).grid(row=0, column=i, padx=4, pady=6)
 
         self.scroll_tabla = ctk.CTkScrollableFrame(
@@ -115,7 +118,7 @@ class PanelPedidos(ctk.CTkFrame):
         self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         tabla_frame.grid_rowconfigure(1, weight=1)
 
-        # ── Barra de paginación ──
+        # Barra de paginación
         barra_pag = ctk.CTkFrame(tabla_frame, fg_color="transparent")
         barra_pag.grid(row=2, column=0, sticky="ew", padx=8, pady=(0, 8))
 
@@ -242,7 +245,9 @@ class PanelPedidos(ctk.CTkFrame):
         id_pedido = self.app.nuevo_id_pedido()
         pedido    = Pedido(id_pedido, codigo, producto.nombre, cantidad)
         self.app.cola.enqueue(pedido)
-        # Notificación SOLO en alta manual (la carga masiva NO notifica)
+        # Notificación que funciona con Telegram: se envía un mensaje al canal de pedidos recibidos
+        # solo si el pedido fue agregado manualmente (no en la generación masiva de datos)
+
         enviar_pedido_recibido(id_pedido, producto.nombre, cantidad, self.app.cola.tamanio())
 
         self._set_estado(f"✅  Pedido {id_pedido} agregado a la cola.", COLOR_ACCENT)
@@ -307,12 +312,19 @@ class PanelPedidos(ctk.CTkFrame):
 
         producto_urgente = "Ninguno"
         stock_minimo = None
+        # Buscar el producto con menor stock en el BST
+        # para reportarlo como "más urgente" en el cierre de turno
+        # más urgete es el que tiene menor stock
         for p in self.app.arbol.inorden():
             if stock_minimo is None or p.stock < stock_minimo:
                 stock_minimo = p.stock
                 producto_urgente = f"{p.nombre} ({p.stock} uds.)"
 
-        enviar_cierre_turno(despachados, en_cola, producto_urgente, 0.0)
+        # Se llama a la función de Telegram para enviar el resumen del turno
+        enviar_cierre_turno(despachados, en_cola, producto_urgente,
+                            self.app.ultimo_tiempo_ms,
+                            self.app.ultimo_algoritmo)
+        
         messagebox.showinfo("Cierre de turno",
             f"Resumen enviado a Telegram:\n"
             f"• Despachados: {despachados}\n"
@@ -353,10 +365,7 @@ class PanelPedidos(ctk.CTkFrame):
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
         self.lbl_estado.configure(text=msg, text_color=color)
 
-    # ------------------------------------------------------------------
-    # PAGINACIÓN
-    # ------------------------------------------------------------------
-
+    # Paginación
     def _total_paginas(self) -> int:
         total = self.app.cola.tamanio()
         if total == 0:
@@ -369,10 +378,7 @@ class PanelPedidos(ctk.CTkFrame):
             self.pagina = nueva_pagina
             self._refrescar_tabla()
 
-    # ------------------------------------------------------------------
-    # TABLA
-    # ------------------------------------------------------------------
-
+    # Tabla de pedidos
     def _refrescar_tabla(self):
         for widget in self.scroll_tabla.winfo_children():
             widget.destroy()
@@ -394,7 +400,7 @@ class PanelPedidos(ctk.CTkFrame):
         else:
             self.lbl_paginacion.configure(
                 text=f"Página {self.pagina + 1} de {self._total_paginas()}"
-                     f"   ·   mostrando {inicio + 1}–{min(fin, total_items)} de {total_items}")
+                     f"   ·   mostrando {inicio + 1}-{min(fin, total_items)} de {total_items}")
 
         for idx, p in enumerate(pedidos_pagina):
             pos_real = inicio + idx   # posición real en toda la cola

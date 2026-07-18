@@ -45,7 +45,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         ctrl.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
         ctk.CTkLabel(ctrl, text="Ordenar por:",
-                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=11)).grid(
+                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12)).grid(
             row=0, column=0, padx=16, pady=12)
 
         self.combo_clave = ctk.CTkComboBox(
@@ -71,15 +71,15 @@ class PanelAlgoritmos(ctk.CTkFrame):
         tiempos_frame = ctk.CTkFrame(ctrl, fg_color="transparent")
         tiempos_frame.grid(row=1, column=0, columnspan=6, pady=(0, 10), padx=16, sticky="ew")
 
-        self.lbl_bubble = self._tarjeta_tiempo(tiempos_frame, "🟡 BubbleSort", "— ms", COLOR_BUBBLE, 0)
-        self.lbl_quick  = self._tarjeta_tiempo(tiempos_frame, "🟢 QuickSort",  "— ms", COLOR_QUICK,  1)
-        self.lbl_merge  = self._tarjeta_tiempo(tiempos_frame, "🟣 MergeSort",  "— ms", COLOR_MERGE,  2)
+        self.lbl_bubble = self._tarjeta_tiempo(tiempos_frame, "🟡 Bubble Sort", "— ms", COLOR_BUBBLE, 0)
+        self.lbl_quick  = self._tarjeta_tiempo(tiempos_frame, "🟢 Quick Sort",  "— ms", COLOR_QUICK,  1)
+        self.lbl_merge  = self._tarjeta_tiempo(tiempos_frame, "🟣 Merge Sort",  "— ms", COLOR_MERGE,  2)
         self.lbl_ganador = ctk.CTkLabel(tiempos_frame, text="",
-                                         font=ctk.CTkFont(size=12, weight="bold"),
+                                         font=ctk.CTkFont(size=14, weight="bold"),
                                          text_color=COLOR_ACCENT)
         self.lbl_ganador.grid(row=1, column=0, columnspan=3, pady=(4, 0))
 
-        # ── Búsqueda ──
+        # Búsqueda de productos por código (binaria) o nombre (lineal)
         busq = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         busq.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5, 20))
         busq.grid_columnconfigure(0, weight=1)
@@ -90,7 +90,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         row_bin.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 4))
 
         ctk.CTkLabel(row_bin, text="🔍 Búsqueda Binaria (código exacto):",
-                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=11)).pack(side="left")
+                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12)).pack(side="left")
         self.entry_bin = ctk.CTkEntry(row_bin, width=180, placeholder_text="LAP-SAM-0001")
         self.entry_bin.pack(side="left", padx=10)
         ctk.CTkButton(row_bin, text="Buscar", width=80,
@@ -102,7 +102,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         row_lin.grid(row=1, column=0, sticky="ew", padx=16, pady=4)
 
         ctk.CTkLabel(row_lin, text="🔎 Búsqueda Lineal (nombre parcial):",
-                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=11)).pack(side="left")
+                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12)).pack(side="left")
         self.entry_lin = ctk.CTkEntry(row_lin, width=180, placeholder_text="Samsung")
         self.entry_lin.pack(side="left", padx=10)
         ctk.CTkButton(row_lin, text="Buscar", width=80,
@@ -163,6 +163,10 @@ class PanelAlgoritmos(ctk.CTkFrame):
         else:
             ganador = "MergeSort"
         
+        # Guardar el mejor resultado para el reporte de cierre de turno
+        self.app.ultimo_tiempo_ms = minimo
+        self.app.ultimo_algoritmo = ganador
+
         self.lbl_ganador.configure(
             text=f"🏆 Más rápido: {ganador} con {minimo} ms ordenando {len(lista)} productos por {clave}",
             text_color=COLOR_ACCENT)
@@ -173,17 +177,25 @@ class PanelAlgoritmos(ctk.CTkFrame):
             return
         clave = self.combo_clave.get()
 
+        # Ejecutar el algoritmo seleccionado y medir el tiempo
         if algoritmo == "bubble":
             datos, ms = bubble_sort(lista, clave)
             self.lbl_bubble.configure(text=f"{ms} ms")
+            nombre_algoritmo = "BubbleSort"
 
         elif algoritmo == "quick":
             datos, ms = quick_sort(lista, clave)
             self.lbl_quick.configure(text=f"{ms} ms")
+            nombre_algoritmo = "QuickSort"
             
         else:
             datos, ms = merge_sort(lista, clave)
             self.lbl_merge.configure(text=f"{ms} ms")
+            nombre_algoritmo = "MergeSort"
+
+        # Guardar el resultado para el reporte de cierre de turno
+        self.app.ultimo_tiempo_ms = ms
+        self.app.ultimo_algoritmo = nombre_algoritmo
 
         self.lbl_ganador.configure(
             text=f"Ordenados {len(datos)} productos por {clave} en {ms} ms",

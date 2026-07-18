@@ -27,12 +27,9 @@ class PanelProductos(ctk.CTkFrame):
         self._construir_ui()
         self._refrescar_tabla()
 
-    # ------------------------------------------------------------------
-    # UI
-    # ------------------------------------------------------------------
-
+    # UI 
     def _construir_ui(self):
-        # ── Encabezado ──
+        # Encabezado
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(1, weight=1)
@@ -46,18 +43,24 @@ class PanelProductos(ctk.CTkFrame):
             text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=11))
         self.lbl_info_arbol.grid(row=0, column=1, padx=16, sticky="e")
 
-        # ── Formulario (2 filas: campos arriba, botones abajo) ──
+        # Formulario de inserción / búsqueda / eliminación
         form = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         form.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
-        campos = [("Código", "entry_codigo"), ("Nombre", "entry_nombre"),
-                  ("Precio $", "entry_precio"), ("Stock", "entry_stock")]
+        campos = [
+            ("Código:", "entry_codigo", "ABC-DEF-0001"), 
+            ("Nombre:", "entry_nombre", "Producto..."),
+            ("Precio $:", "entry_precio", "0.00"), 
+            ("Stock:", "entry_stock", "Cantidad")
+        ]
 
-        for i, (label, attr) in enumerate(campos):
+        for i, (label, attr, sugerencia) in enumerate(campos):
             ctk.CTkLabel(form, text=label, text_color=COLOR_SUBTEXT,
-                         font=ctk.CTkFont(size=11)).grid(row=0, column=i*2, padx=(16, 4), pady=(10, 4))
-            entry = ctk.CTkEntry(form, width=130, placeholder_text=label)
+                        font=ctk.CTkFont(size=12)).grid(row=0, column=i*2, padx=(16, 4), pady=(10, 4))
+            
+            entry = ctk.CTkEntry(form, width=130, placeholder_text=sugerencia)
             entry.grid(row=0, column=i*2+1, padx=(0, 8), pady=(10, 4))
+            
             setattr(self, attr, entry)
 
         # Botones en fila separada para que no se salgan de la pantalla
@@ -82,7 +85,7 @@ class PanelProductos(ctk.CTkFrame):
                                         font=ctk.CTkFont(size=11))
         self.lbl_estado.grid(row=2, column=0, columnspan=8, pady=(0, 8))
 
-        # ── Tabla ──
+        # Tabla de productos (scrollable)
         tabla_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         tabla_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5, 20))
         tabla_frame.grid_columnconfigure(0, weight=1)
@@ -96,7 +99,7 @@ class PanelProductos(ctk.CTkFrame):
         hdr.grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 0))
         for i, (col, w) in enumerate(cols):
             ctk.CTkLabel(hdr, text=col, width=w,
-                         font=ctk.CTkFont(size=11, weight="bold"),
+                         font=ctk.CTkFont(size=12, weight="bold"),
                          text_color=COLOR_ACCENT).grid(row=0, column=i, padx=4, pady=6)
 
         # Scroll
@@ -105,7 +108,7 @@ class PanelProductos(ctk.CTkFrame):
         self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         tabla_frame.grid_rowconfigure(1, weight=1)
 
-        # ── Barra de paginación ──
+        # Barra de paginación
         barra_pag = ctk.CTkFrame(tabla_frame, fg_color="transparent")
         barra_pag.grid(row=2, column=0, sticky="ew", padx=8, pady=(0, 8))
 
@@ -122,10 +125,7 @@ class PanelProductos(ctk.CTkFrame):
                       fg_color="#374151", hover_color="#4b5563",
                       command=lambda: self._cambiar_pagina(1)).pack(side="right", padx=4)
 
-    # ------------------------------------------------------------------
-    # ACCIONES
-    # ------------------------------------------------------------------
-
+    # Acciones de los botones
     def _insertar(self):
         codigo = self.entry_codigo.get().strip().upper()
         nombre = self.entry_nombre.get().strip()
@@ -209,10 +209,7 @@ class PanelProductos(ctk.CTkFrame):
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
         self.lbl_estado.configure(text=msg, text_color=color)
 
-    # ------------------------------------------------------------------
-    # PAGINACIÓN
-    # ------------------------------------------------------------------
-
+    # Paginación de la tabla
     def _total_paginas(self) -> int:
         total = self.app.arbol.total()
         if total == 0:
@@ -225,10 +222,7 @@ class PanelProductos(ctk.CTkFrame):
             self.pagina = nueva_pagina
             self._refrescar_tabla()
 
-    # ------------------------------------------------------------------
-    # TABLA DINÁMICA
-    # ------------------------------------------------------------------
-
+    # Tabla dinámica (recorrido inorden del BST)
     def _refrescar_tabla(self):
         for widget in self.scroll_tabla.winfo_children():
             widget.destroy()
