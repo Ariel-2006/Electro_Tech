@@ -176,10 +176,11 @@ class PanelAlgoritmos(ctk.CTkFrame):
         if algoritmo == "bubble":
             datos, ms = bubble_sort(lista, clave)
             self.lbl_bubble.configure(text=f"{ms} ms")
+
         elif algoritmo == "quick":
             datos, ms = quick_sort(lista, clave)
             self.lbl_quick.configure(text=f"{ms} ms")
-            self._lista_ordenada = datos
+            
         else:
             datos, ms = merge_sort(lista, clave)
             self.lbl_merge.configure(text=f"{ms} ms")

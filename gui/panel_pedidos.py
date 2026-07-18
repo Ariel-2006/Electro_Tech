@@ -67,6 +67,9 @@ class PanelPedidos(ctk.CTkFrame):
         btn_frame = ctk.CTkFrame(form, fg_color="transparent")
         btn_frame.grid(row=0, column=4, padx=16)
 
+        ctk.CTkButton(btn_frame, text="🔎 Elegir del catálogo", width=150,
+                      fg_color="#6d28d9",
+                      command=self._abrir_selector).pack(side="left", padx=4)
         ctk.CTkButton(btn_frame, text="➕ Agregar pedido", width=130,
                       fg_color=COLOR_ACCENT, text_color="#000",
                       command=self._agregar_pedido).pack(side="left", padx=4)
@@ -129,9 +132,69 @@ class PanelPedidos(ctk.CTkFrame):
                       fg_color="#374151", hover_color="#4b5563",
                       command=lambda: self._cambiar_pagina(1)).pack(side="right", padx=4)
 
-    # ------------------------------------------------------------------
     # ACCIONES
-    # ------------------------------------------------------------------
+    def _abrir_selector(self):
+            """Abre una ventana para elegir un producto del catálogo sin escribir el código."""
+            if self.app.arbol.esta_vacio():
+                self.bell()
+                messagebox.showinfo("Catálogo vacío",
+                    "No hay productos en el catálogo.\n"
+                    "Genera datos primero en el panel Generador.")
+                return
+
+            ventana = ctk.CTkToplevel(self)
+            ventana.title("Seleccionar producto del catálogo")
+            ventana.geometry("560x460")
+            ventana.configure(fg_color=COLOR_BG)
+            ventana.transient(self)          # se mantiene sobre la ventana principal
+            ventana.grab_set()               # bloquea el foco hasta elegir/cerrar
+
+            ctk.CTkLabel(ventana, text="🔎 Escribe para filtrar por código o nombre:",
+                        text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12)).pack(
+                padx=16, pady=(16, 4), anchor="w")
+
+            entry_filtro = ctk.CTkEntry(ventana, width=520,
+                                        placeholder_text="Ej: Samsung, LAP, Mouse...")
+            entry_filtro.pack(padx=16, pady=4)
+
+            lista_scroll = ctk.CTkScrollableFrame(ventana, fg_color=COLOR_CARD, corner_radius=8)
+            lista_scroll.pack(fill="both", expand=True, padx=16, pady=(8, 16))
+
+            def elegir(codigo_producto):
+                self.entry_codigo.delete(0, "end")
+                self.entry_codigo.insert(0, codigo_producto)
+                self.entry_cantidad.focus()   # deja el cursor listo en Cantidad
+                ventana.destroy()
+
+            def poblar(filtro=""):
+                for widget in lista_scroll.winfo_children():
+                    widget.destroy()
+
+                filtro = filtro.strip().lower()
+                mostrados = 0
+                for p in self.app.arbol.inorden():
+                    if filtro and filtro not in p.codigo.lower() and filtro not in p.nombre.lower():
+                        continue
+                    texto = f"{p.codigo}   |   {p.nombre}   |   ${p.precio:.2f}   |   Stock: {p.stock}"
+                    ctk.CTkButton(lista_scroll, text=texto, anchor="w",
+                                fg_color="#111827", hover_color="#1e293b",
+                                text_color=COLOR_TEXT, font=ctk.CTkFont(size=11),
+                                command=lambda c=p.codigo: elegir(c)).pack(fill="x", pady=1)
+                    mostrados += 1
+                    if mostrados >= 50:      # límite para que la lista sea rápida
+                        ctk.CTkLabel(lista_scroll,
+                                    text="… afina el filtro para ver más resultados",
+                                    text_color=COLOR_SUBTEXT,
+                                    font=ctk.CTkFont(size=10)).pack(pady=4)
+                        break
+
+                if mostrados == 0:
+                    ctk.CTkLabel(lista_scroll, text="Sin coincidencias.",
+                                text_color=COLOR_WARN).pack(pady=8)
+
+            # Cada vez que se escribe, se vuelve a filtrar la lista
+            entry_filtro.bind("<KeyRelease>", lambda e: poblar(entry_filtro.get()))
+            poblar()
 
     def _agregar_pedido(self):
         codigo = self.entry_codigo.get().strip().upper()

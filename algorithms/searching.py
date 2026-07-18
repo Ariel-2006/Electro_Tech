@@ -73,9 +73,7 @@ def busqueda_lineal(lista: list, termino: str) -> tuple:
     return resultados, tiempo_ms, comparaciones
 
 
-def busqueda_por_rango_precio(lista: list,
-                               precio_min: float,
-                               precio_max: float) -> tuple:
+def busqueda_por_rango_precio(lista: list, precio_min: float, precio_max: float) -> tuple:
     """
     Retorna todos los productos cuyo precio esté en el rango [min, max].
     Búsqueda lineal sobre cualquier lista.

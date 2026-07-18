@@ -85,14 +85,27 @@ def _quick_sort_rec(datos: list, clave: str) -> list:
         return datos
 
     # Pivote: elemento del centro
-    pivote     = datos[len(datos) // 2]
-    val_pivote = _obtener_valor(pivote, clave)
+    indice_medio = len(datos) // 2
+    pivote       = datos[indice_medio]
+    valor_pivote = _obtener_valor(pivote, clave)
 
-    menores  = [x for x in datos if _obtener_valor(x, clave) <  val_pivote]
-    iguales  = [x for x in datos if _obtener_valor(x, clave) == val_pivote]
-    mayores  = [x for x in datos if _obtener_valor(x, clave) >  val_pivote]
+    # Separar en tres grupos recorriendo la lista una sola vez
+    menores = []
+    iguales = []
+    mayores = []
+    for producto in datos:
+        valor_actual = _obtener_valor(producto, clave)
+        if valor_actual < valor_pivote:
+            menores.append(producto)
+        elif valor_actual > valor_pivote:
+            mayores.append(producto)
+        else:
+            iguales.append(producto)
 
-    return _quick_sort_rec(menores, clave) + iguales + _quick_sort_rec(mayores, clave)
+    # Ordenar recursivamente los extremos y unir: menores + iguales + mayores
+    izquierda_ordenada = _quick_sort_rec(menores, clave)
+    derecha_ordenada   = _quick_sort_rec(mayores, clave)
+    return izquierda_ordenada + iguales + derecha_ordenada
 
 # MERGE SORT
 # Funciona dividiendo la lista en mitades, ordenando cada mitad y fusionando.
