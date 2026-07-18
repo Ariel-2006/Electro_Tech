@@ -2,7 +2,7 @@
 
 **Proyecto Investigación Formativa — Estructura de Datos | UNACH CDIA 2026-1S**
 
-Equipo: Freddy Erazo · Zuly Correa · Ariel Jiménez · Wendy Moreta
+Grupo 1: Freddy Erazo · Zuly Correa · Ariel Jiménez · Wendy Moreta
 
 ## Descripción
 Simulación de un sistema de gestión de tienda de tecnología que implementa estructuras de datos en Python con interfaz gráfica CustomTkinter.
@@ -16,7 +16,7 @@ Simulación de un sistema de gestión de tienda de tecnología que implementa es
 - **BubbleSort, QuickSort, MergeSort** con timer en ms (`algorithms/sorting.py`)
 - **Búsqueda binaria y lineal** (`algorithms/searching.py`)
 
-## Notificaciones de Telegram (Opcional)
+## Notificaciones de Telegram
 
 El sistema incluye un módulo de alertas automáticas de stock crítico, cierres de turno y envíos vía Telegram. Las peticiones se ejecutan en hilos independientes (`threading`) para garantizar que la interfaz de usuario no se bloquee durante el envío
 
