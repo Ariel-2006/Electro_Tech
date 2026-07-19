@@ -11,7 +11,7 @@ COLOR_SUBTEXT = "#94a3b8"
 COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 
-
+# Clase PanelProductos
 class PanelProductos(ctk.CTkFrame):
     """
     Panel del catálogo de productos.
@@ -46,14 +46,15 @@ class PanelProductos(ctk.CTkFrame):
         # Formulario de inserción / búsqueda / eliminación
         form = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         form.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
-
+        # Campos del formulario
+        # campos permite definir el label, el atributo del entry y la sugerencia de placeholder
         campos = [
             ("Código:", "entry_codigo", "ABC-DEF-0001"), 
             ("Nombre:", "entry_nombre", "Producto..."),
             ("Precio $:", "entry_precio", "0.00"), 
             ("Stock:", "entry_stock", "Cantidad")
         ]
-
+        # Crear los labels y entries dinámicamente
         for i, (label, attr, sugerencia) in enumerate(campos):
             ctk.CTkLabel(form, text=label, text_color=COLOR_SUBTEXT,
                         font=ctk.CTkFont(size=12)).grid(row=0, column=i*2, padx=(16, 4), pady=(10, 4))
@@ -66,7 +67,7 @@ class PanelProductos(ctk.CTkFrame):
         # Botones en fila separada para que no se salgan de la pantalla
         btn_frame = ctk.CTkFrame(form, fg_color="transparent")
         btn_frame.grid(row=1, column=0, columnspan=8, pady=(4, 4))
-
+        # Botones de acción para insertar, buscar, eliminar y limpiar
         ctk.CTkButton(btn_frame, text="➕ Insertar", width=100,
                       fg_color=COLOR_ACCENT, text_color="#000",
                       command=self._insertar).pack(side="left", padx=4)
@@ -85,7 +86,7 @@ class PanelProductos(ctk.CTkFrame):
                                         font=ctk.CTkFont(size=11))
         self.lbl_estado.grid(row=2, column=0, columnspan=8, pady=(0, 8))
 
-        # Tabla de productos (scrollable)
+        # Tabla de productos con scroll y paginación
         tabla_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         tabla_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(5, 20))
         tabla_frame.grid_columnconfigure(0, weight=1)
@@ -102,7 +103,7 @@ class PanelProductos(ctk.CTkFrame):
                          font=ctk.CTkFont(size=12, weight="bold"),
                          text_color=COLOR_ACCENT).grid(row=0, column=i, padx=4, pady=6)
 
-        # Scroll
+        # Scroll para la tabla
         self.scroll_tabla = ctk.CTkScrollableFrame(
             tabla_frame, fg_color="transparent", corner_radius=0)
         self.scroll_tabla.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
@@ -126,6 +127,8 @@ class PanelProductos(ctk.CTkFrame):
                       command=lambda: self._cambiar_pagina(1)).pack(side="right", padx=4)
 
     # Acciones de los botones
+    # Funciones para insertar, buscar y eliminar productos en el BST
+    # Se inserta un producto solo si no existe el código
     def _insertar(self):
         codigo = self.entry_codigo.get().strip().upper()
         nombre = self.entry_nombre.get().strip()
@@ -163,7 +166,7 @@ class PanelProductos(ctk.CTkFrame):
         self._set_estado(f"✅  Producto {codigo} insertado en el BST.", COLOR_ACCENT)
         self._limpiar_form()
         self._refrescar_tabla()
-
+    # Función para buscar un producto por código en el BST
     def _buscar(self):
         codigo = self.entry_codigo.get().strip().upper()
         if not codigo:
@@ -184,7 +187,7 @@ class PanelProductos(ctk.CTkFrame):
             self.bell()
             messagebox.showinfo("No encontrado",
                 f"El código {codigo} no existe en el catálogo.")
-
+    # Función para eliminar un producto por código en el BST
     def _eliminar(self):
         codigo = self.entry_codigo.get().strip().upper()
         if not codigo:
@@ -201,11 +204,11 @@ class PanelProductos(ctk.CTkFrame):
             self.bell()
             messagebox.showerror("No existe",
                 f"El código {codigo} no existe en el BST. No se puede eliminar.")
-
+    # Función para limpiar los campos del formulario
     def _limpiar_form(self):
         for attr in ("entry_codigo", "entry_nombre", "entry_precio", "entry_stock"):
             getattr(self, attr).delete(0, "end")
-
+    # Función para actualizar el mensaje de estado en la interfaz
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
         self.lbl_estado.configure(text=msg, text_color=color)
 
@@ -215,7 +218,7 @@ class PanelProductos(ctk.CTkFrame):
         if total == 0:
             return 1
         return (total - 1) // self.items_por_pag + 1
-
+    # Cambiar página (anterior o siguiente)
     def _cambiar_pagina(self, delta: int):
         nueva_pagina = self.pagina + delta
         if 0 <= nueva_pagina < self._total_paginas():

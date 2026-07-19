@@ -136,32 +136,6 @@ class ArbolBST:
         resultado.append(nodo.producto)
         self._inorden_rec(nodo.derecho, resultado)
 
-    def preorden(self) -> list:
-        """Recorrido raíz → izquierda → derecha."""
-        resultado = []
-        self._preorden_rec(self._raiz, resultado)
-        return resultado
-
-    def _preorden_rec(self, nodo: NodoBST, resultado: list):
-        if nodo is None:
-            return
-        resultado.append(nodo.producto)
-        self._preorden_rec(nodo.izquierdo, resultado)
-        self._preorden_rec(nodo.derecho, resultado)
-
-    def postorden(self) -> list:
-        """Recorrido izquierda → derecha → raíz."""
-        resultado = []
-        self._postorden_rec(self._raiz, resultado)
-        return resultado
-
-    def _postorden_rec(self, nodo: NodoBST, resultado: list):
-        if nodo is None:
-            return
-        self._postorden_rec(nodo.izquierdo, resultado)
-        self._postorden_rec(nodo.derecho, resultado)
-        resultado.append(nodo.producto)
-
     # Funciones: altura, total, esta_vacio
     def altura(self) -> int:
         """Retorna la altura del árbol (número de niveles)."""
@@ -176,6 +150,11 @@ class ArbolBST:
     def total(self) -> int:
         """Retorna el número total de productos en el árbol."""
         return self._total
+
+    def limpiar(self):
+        """Vacía el árbol por completo """
+        self._raiz  = None
+        self._total = 0
 
     def esta_vacio(self) -> bool:
         return self._raiz is None

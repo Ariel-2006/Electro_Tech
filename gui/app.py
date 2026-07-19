@@ -2,19 +2,17 @@
 # Instancia las estructuras y las comparte con todos los paneles.
 
 import customtkinter as ctk
-import threading
 
 from structures.bst_productos  import ArbolBST
 from structures.queue_pedidos  import Cola
 from structures.stack_historial import Pila
-from data.generator            import generar_todo
 
 from gui.panel_productos   import PanelProductos
 from gui.panel_pedidos     import PanelPedidos
 from gui.panel_algoritmos  import PanelAlgoritmos
 from gui.panel_generador   import PanelGenerador
 
-# Tema global
+# Tema global de la aplicación
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
 
@@ -24,13 +22,12 @@ COLOR_ACCENT   = "#00c896"
 COLOR_TEXT     = "#e2e8f0"
 COLOR_SUBTEXT  = "#94a3b8"
 
-
+# Ventana principal de la aplicación
 class AppElectroTech(ctk.CTk):
     """
     Ventana principal de ElectroTech Store.
     Contiene el menú lateral y renderiza el panel activo.
     """
-
     def __init__(self):
         super().__init__()
 
@@ -109,7 +106,7 @@ class AppElectroTech(ctk.CTk):
                      text="Freddy · Zuly · Ariel · Wendy",
                      font=ctk.CTkFont(size=12),
                      text_color="#475569").place(relx=0.5, rely=0.97, anchor="s")
-
+    # Botón de menú: ayuda a navegar entre paneles
     def _boton_menu(self, parent, texto: str, panel_id: str) -> ctk.CTkButton:
         btn = ctk.CTkButton(
             parent,
@@ -125,7 +122,7 @@ class AppElectroTech(ctk.CTk):
         )
         btn.pack(fill="x", padx=12, pady=3)
         return btn
-
+    # Registro de botones: ayuda a resaltar el botón activo en el sidebar
     def _registrar_botones(self):
         self._botones_menu = {
             "productos":  self._btn_productos,

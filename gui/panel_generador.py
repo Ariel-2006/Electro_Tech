@@ -3,7 +3,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 import threading
 import time
-from data.generator import generar_todo
+from data.generator import generar_todo, reiniciar_secuencial
 
 COLOR_ACCENT  = "#00c896"
 COLOR_BG      = "#0f1117"
@@ -13,7 +13,7 @@ COLOR_SUBTEXT = "#94a3b8"
 COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 
-
+# Clase del panel de generador masivo de datos
 class PanelGenerador(ctk.CTkFrame):
     """
     Panel de carga masiva de datos sintéticos.
@@ -28,14 +28,14 @@ class PanelGenerador(ctk.CTkFrame):
         self._construir_ui()
 
     def _construir_ui(self):
-        # ── Encabezado ──
+        # Encabezado de panel
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         ctk.CTkLabel(header, text="🎲  Generador de Datos Sintéticos",
                      font=ctk.CTkFont(size=18, weight="bold"),
                      text_color=COLOR_ACCENT).pack(side="left", padx=16, pady=12)
 
-        # ── Controles ──
+        # Controles de generación
         ctrl = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         ctrl.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
@@ -70,7 +70,7 @@ class PanelGenerador(ctk.CTkFrame):
             command=self._iniciar_generacion)
         self.btn_generar.grid(row=0, column=6, padx=20)
 
-        # Nota informativa
+        # Nota informativa para el usuario sobre la relación entre productos y pedidos
         ctk.CTkLabel(ctrl,
                      text="ℹ️  Los pedidos no pueden superar la cantidad de productos "
                           "(un negocio no puede recibir más pedidos que productos en catálogo).",
@@ -78,7 +78,7 @@ class PanelGenerador(ctk.CTkFrame):
                      font=ctk.CTkFont(size=12)).grid(
             row=1, column=0, columnspan=7, padx=16, pady=(0, 8))
 
-        # ── Barra de progreso ──
+        # Barra de progreso de generación
         prog_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         prog_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=5)
         prog_frame.grid_columnconfigure(0, weight=1)
@@ -93,7 +93,7 @@ class PanelGenerador(ctk.CTkFrame):
         self.progress_bar.set(0)
         self.progress_bar.pack(fill="x", padx=16, pady=(0, 12))
 
-        # ── Log de resultados ──
+        # Log de resultados que permite al usuario ver el progreso de la generación y los resultados finales
         log_frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         log_frame.grid(row=3, column=0, sticky="nsew", padx=20, pady=(5, 20))
         log_frame.grid_columnconfigure(0, weight=1)
@@ -112,13 +112,11 @@ class PanelGenerador(ctk.CTkFrame):
 
         self._log("Sistema iniciado. Presiona 'GENERAR AHORA' para cargar datos masivos.")
 
-    # ------------------------------------------------------------------
-    # GENERACIÓN EN HILO SEPARADO
-    # ------------------------------------------------------------------
-
+    # Generación de datos sintéticos en un hilo separado para no bloquear la GUI
     def _iniciar_generacion(self):
         if self._generando:
             return
+        # Validación de entradas, donde se asegura que los valores ingresados sean números enteros y cumplan con las reglas de negocio
         try:
             n_prod = int(self.entry_n.get().strip())
             n_ped  = int(self.entry_p.get().strip())
@@ -164,7 +162,7 @@ class PanelGenerador(ctk.CTkFrame):
             args=(n_prod, n_ped),
             daemon=True)
         hilo.start()
-
+    # Generación de datos sintéticos en un hilo separado para no bloquear la GUI
     def _generar_en_hilo(self, n_prod: int, n_ped: int):
         """Corre en thread separado para no bloquear la GUI."""
         try:
@@ -172,10 +170,10 @@ class PanelGenerador(ctk.CTkFrame):
 
             # Limpiar estructuras si está marcado
             if self.check_limpiar.get():
-                self.app.arbol._raiz  = None
-                self.app.arbol._total = 0
+                self.app.arbol.limpiar()
                 self.app.cola.limpiar()
                 self.app.pila.limpiar()
+                reiniciar_secuencial()   # los códigos vuelven a empezar en 0001
                 self._actualizar_ui(lambda: self._log("🧹 Estructuras limpiadas."))
 
             # Generar datos
@@ -217,22 +215,23 @@ class PanelGenerador(ctk.CTkFrame):
             self._generando = False
             self._actualizar_ui(lambda: self.btn_generar.configure(
                 state="normal", text="🚀 GENERAR AHORA"))
-
+    # Mostrar resultados finales en el log y actualizar estadísticas
     def _mostrar_resultado(self, n_prod, n_ped, tiempo_ms):
         self.progress_bar.set(1.0)
         self._log("─" * 60)
         self._log(f"✅  GENERACIÓN COMPLETADA")
         self._log(f"   Productos insertados en BST : {n_prod:>6}")
         self._log(f"   Pedidos encolados (FIFO)    : {n_ped:>6}")
-        self._log(f"   Altura del árbol BST        : {self.app.arbol.altura():>6} niveles")
+        self._log(f"   Estado del árbol            : {self.app.arbol}")
+        self._log(f"   Estado de la cola           : {self.app.cola}")
         self._log(f"   Tiempo total                : {tiempo_ms:>6} ms")
         self._log("─" * 60)
         self.app.actualizar_stats()
-
+    # Programar la actualización de la interfaz en el hilo principal de Tkinter
     def _actualizar_ui(self, fn):
         """Programa la actualización en el hilo principal de Tkinter."""
         self.after(0, fn)
-
+    # Log de mensajes en el panel de resultados
     def _log(self, mensaje: str, color: str = None):
         self.txt_log.configure(state="normal")
         self.txt_log.insert("end", mensaje + "\n")

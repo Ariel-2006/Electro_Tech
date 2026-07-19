@@ -16,7 +16,7 @@ COLOR_BUBBLE  = "#f59e0b"
 COLOR_QUICK   = "#34d399"
 COLOR_MERGE   = "#a78bfa"
 
-
+# Clase PanelAlgoritmos: Panel de comparación de algoritmos de ordenación y búsqueda.
 class PanelAlgoritmos(ctk.CTkFrame):
     """
     Panel de comparación de algoritmos de ordenación y búsqueda.
@@ -30,9 +30,9 @@ class PanelAlgoritmos(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
         self._construir_ui()
-
+    # Funciones internas para construir la interfaz de usuario
     def _construir_ui(self):
-        # ── Encabezado ──
+        # Encabezado del panel
         header = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
 
@@ -40,7 +40,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
                      font=ctk.CTkFont(size=18, weight="bold"),
                      text_color=COLOR_ACCENT).pack(side="left", padx=16, pady=12)
 
-        # ── Controles de Ordenación ──
+        # Control de selección de clave y botones de ordenación
         ctrl = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12)
         ctrl.grid(row=1, column=0, sticky="ew", padx=20, pady=5)
 
@@ -54,6 +54,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         self.combo_clave.set("precio")
         self.combo_clave.grid(row=0, column=1, padx=8)
 
+        # Botones de ordenación y comparación
         ctk.CTkButton(ctrl, text="🔄 Comparar los 3 algoritmos", width=200,
                       fg_color=COLOR_ACCENT, text_color="#000",
                       command=self._comparar).grid(row=0, column=2, padx=16)
@@ -120,7 +121,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
             busq, fg_color="transparent", corner_radius=0)
         self.scroll_resultados.grid(row=3, column=0, sticky="nsew", padx=8, pady=(0, 8))
         busq.grid_rowconfigure(3, weight=1)
-
+    # Función para mostrar tarjetas de tiempo de ejecución de algoritmos
     def _tarjeta_tiempo(self, parent, titulo, valor, color, col):
         frame = ctk.CTkFrame(parent, fg_color="#111827", corner_radius=8, width=200)
         frame.grid(row=0, column=col, padx=8, pady=4, sticky="ew")
@@ -135,7 +136,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
    # Ordenación y comparación de algoritmos
     def _obtener_lista(self) -> list:
         return self.app.arbol.inorden()
-
+    # Comparar los tres algoritmos y mostrar el más rápido
     def _comparar(self):
         lista = self._obtener_lista()
         if not lista:
@@ -170,7 +171,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
         self.lbl_ganador.configure(
             text=f"🏆 Más rápido: {ganador} con {minimo} ms ordenando {len(lista)} productos por {clave}",
             text_color=COLOR_ACCENT)
-
+    # Ordenar la lista usando el algoritmo seleccionado y mostrar el tiempo
     def _ordenar(self, algoritmo: str):
         lista = self._obtener_lista()
         if not lista:
@@ -201,7 +202,8 @@ class PanelAlgoritmos(ctk.CTkFrame):
             text=f"Ordenados {len(datos)} productos por {clave} en {ms} ms",
             text_color=COLOR_SUBTEXT)
 
-    # Búsqueda de productos por código (binaria) o nombre (lineal)
+    # Búsqueda de productos por código (binaria)
+    # Realiza una búsqueda binaria en la lista ordenada por código y muestra el resultado
     def _buscar_binaria(self):
         codigo = self.entry_bin.get().strip().upper()
         if not codigo:
@@ -228,7 +230,8 @@ class PanelAlgoritmos(ctk.CTkFrame):
             self.lbl_busq.configure(
                 text=f"❌  '{codigo}' no encontrado. {comparaciones} comparaciones en {ms} ms",
                 text_color=COLOR_ERROR)
-
+    # Búsqueda lineal por nombre parcial
+    # Realiza una búsqueda lineal en la lista y muestra los resultados que coincidan con el término parcial
     def _buscar_lineal(self):
         termino = self.entry_lin.get().strip()
         if not termino:
@@ -251,7 +254,7 @@ class PanelAlgoritmos(ctk.CTkFrame):
 
         for p in resultados:
             self._fila_resultado(p)
-
+    # Función para mostrar una fila de resultado en el scroll de resultados
     def _fila_resultado(self, p):
         fila = ctk.CTkFrame(self.scroll_resultados, fg_color="#111827", corner_radius=6)
         fila.pack(fill="x", pady=2, padx=4)

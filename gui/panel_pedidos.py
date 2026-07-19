@@ -17,7 +17,7 @@ COLOR_ERROR   = "#f87171"
 COLOR_WARN    = "#fbbf24"
 COLOR_INFO    = "#60a5fa"
 
-
+# Clase principal del panel de pedidos
 class PanelPedidos(ctk.CTkFrame):
     """
     Panel de la cola de despacho de pedidos.
@@ -66,6 +66,7 @@ class PanelPedidos(ctk.CTkFrame):
         btn_frame = ctk.CTkFrame(form, fg_color="transparent")
         btn_frame.grid(row=0, column=4, padx=16)
 
+        # Botones de acción para agregar, despachar, deshacer y cerrar turno
         ctk.CTkButton(btn_frame, text="🔎 Elegir del catálogo", width=150,
                       fg_color="#6d28d9",
                       command=self._abrir_selector).pack(side="left", padx=4)
@@ -136,6 +137,7 @@ class PanelPedidos(ctk.CTkFrame):
                       command=lambda: self._cambiar_pagina(1)).pack(side="right", padx=4)
 
     # ACCIONES
+    # Abrir selector de productos del catálogo
     def _abrir_selector(self):
             """Abre una ventana para elegir un producto del catálogo sin escribir el código."""
             if self.app.arbol.esta_vacio():
@@ -162,13 +164,13 @@ class PanelPedidos(ctk.CTkFrame):
 
             lista_scroll = ctk.CTkScrollableFrame(ventana, fg_color=COLOR_CARD, corner_radius=8)
             lista_scroll.pack(fill="both", expand=True, padx=16, pady=(8, 16))
-
+            # Función para elegir un producto y cerrar la ventana
             def elegir(codigo_producto):
                 self.entry_codigo.delete(0, "end")
                 self.entry_codigo.insert(0, codigo_producto)
                 self.entry_cantidad.focus()   # deja el cursor listo en Cantidad
                 ventana.destroy()
-
+            # Función para poblar la lista de productos según el filtro
             def poblar(filtro=""):
                 for widget in lista_scroll.winfo_children():
                     widget.destroy()
@@ -196,9 +198,11 @@ class PanelPedidos(ctk.CTkFrame):
                                 text_color=COLOR_WARN).pack(pady=8)
 
             # Cada vez que se escribe, se vuelve a filtrar la lista
+            # Se usa <KeyRelease> para que se actualice al soltar la tecla
+            # lambda e: poblar(entry_filtro.get()) permite pasar el valor del entry a la función poblar
             entry_filtro.bind("<KeyRelease>", lambda e: poblar(entry_filtro.get()))
             poblar()
-
+    # Agregar pedido manualmente
     def _agregar_pedido(self):
         codigo = self.entry_codigo.get().strip().upper()
         cant_txt = self.entry_cantidad.get().strip()
@@ -210,7 +214,7 @@ class PanelPedidos(ctk.CTkFrame):
                 "• Código producto (ej: LAP-SAM-0001)\n"
                 "• Cantidad (número entero)")
             return
-
+        # Validar que la cantidad sea un número entero
         try:
             cantidad = int(cant_txt)
         except ValueError:
@@ -254,7 +258,7 @@ class PanelPedidos(ctk.CTkFrame):
         self.entry_codigo.delete(0, "end")
         self.entry_cantidad.delete(0, "end")
         self._refrescar_tabla()
-
+    # Despachar pedido del frente de la cola
     def _despachar(self):
         """Procesa el pedido del frente: dequeue + reduce stock + push historial."""
         pedido = self.app.cola.dequeue()
@@ -269,7 +273,7 @@ class PanelPedidos(ctk.CTkFrame):
         producto = self.app.arbol.buscar(pedido.codigo_producto)
         if producto:
             producto.reducir_stock(pedido.cantidad)
-            # La alerta se revisa DESPUÉS de reducir
+            # La alerta se revisa después de reducir el stock, para que se envíe solo si quedó en stock crítico
             if producto.tiene_stock_critico():
                 enviar_alerta_stock(producto.nombre, producto.codigo, producto.stock)
             # Mensaje en pantalla
@@ -297,7 +301,7 @@ class PanelPedidos(ctk.CTkFrame):
             pedido.id_pedido, pedido.codigo_producto, pedido.cantidad)
         self.app.pila.push(registro)
         self._refrescar_tabla()
-
+    # Cerrar turno y enviar resumen a Telegram
     def _cerrar_turno(self):
         """Envía a Telegram el resumen del turno (3er tipo de alerta)."""
         if self.app.arbol.esta_vacio():
@@ -314,7 +318,7 @@ class PanelPedidos(ctk.CTkFrame):
         stock_minimo = None
         # Buscar el producto con menor stock en el BST
         # para reportarlo como "más urgente" en el cierre de turno
-        # más urgete es el que tiene menor stock
+        # más urgente es el que tiene menor stock
         for p in self.app.arbol.inorden():
             if stock_minimo is None or p.stock < stock_minimo:
                 stock_minimo = p.stock
@@ -331,7 +335,7 @@ class PanelPedidos(ctk.CTkFrame):
             f"• En cola: {en_cola}\n"
             f"• Más urgente: {producto_urgente}")
         self._set_estado("🔔  Resumen de cierre de turno enviado a Telegram.", COLOR_INFO)
-
+    # Deshacer último despacho
     def _deshacer(self):
         """Deshace el último despacho: pop historial + repone stock en BST."""
         registro = self.app.pila.pop()
@@ -356,10 +360,13 @@ class PanelPedidos(ctk.CTkFrame):
                 f"(producto no encontrado en BST)", COLOR_WARN)
 
         # Re-encolar el pedido
+        # Se reconstruye el objeto Pedido para reinsertarlo en la cola
         pedido = Pedido(registro.id_pedido, registro.codigo_producto,
                         producto.nombre if producto else registro.codigo_producto,
                         registro.cantidad)
+        # Se re-encola al final de la cola, no al frente
         self.app.cola.enqueue(pedido)
+        # Actualizar la tabla y la información de la cola
         self._refrescar_tabla()
 
     def _set_estado(self, msg: str, color: str = COLOR_ACCENT):
@@ -371,7 +378,7 @@ class PanelPedidos(ctk.CTkFrame):
         if total == 0:
             return 1
         return (total - 1) // self.items_por_pag + 1
-
+    # Cambiar página (anterior/siguiente)
     def _cambiar_pagina(self, delta: int):
         nueva_pagina = self.pagina + delta
         if 0 <= nueva_pagina < self._total_paginas():
