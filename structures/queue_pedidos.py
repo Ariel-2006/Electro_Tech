@@ -8,6 +8,10 @@ class NodoPedido:
         self.siguiente = None
 
 class Cola:
+    """
+    Estructura de datos tipo cola para almacenar pedidos.
+    Implementa operaciones de encolado, desencolado y consulta del frente.
+    """
     def __init__(self):
         self._frente = None
         self._final = None
