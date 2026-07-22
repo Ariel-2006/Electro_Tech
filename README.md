@@ -21,6 +21,13 @@ Simulación de un sistema de gestión de tienda de tecnología que implementa es
 El sistema incluye un módulo de alertas automáticas de stock crítico, cierres de turno y envíos vía Telegram. Las peticiones se ejecutan en hilos independientes (`threading`) para garantizar que la interfaz de usuario no se bloquee durante el envío
 
 ## Instalación
+
+**Crear el entorno virtual en la ruta de la carpeta principal:**
+```bash
+python -m venv .venv
+```
+
+**Librerías:**
 ```bash
 pip install customtkinter python-telegram-bot
 python main.py
